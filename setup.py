@@ -25,24 +25,25 @@ ABOUT = load_about()
 
 
 setup(
-    name="tutor-contrib-enterprisecatalog",
+    name="tutor-contrib-enterprise-catalog",
     version=ABOUT["__version__"],
-    url="https://github.com/Dicey-Tech/tutor-contrib-enterprisecatalog",
+    url="https://github.com/Dicey-Tech/tutor-contrib-enterprise-catalog",
     project_urls={
-        "Code": "https://github.com/Dicey-Tech/tutor-contrib-enterprisecatalog",
-        "Issue tracker": "https://github.com/Dicey-Tech/tutor-contrib-enterprisecatalog/issues",
+        "Code": "https://github.com/Dicey-Tech/tutor-contrib-enterprise-catalog",
+        "Issue tracker": "https://github.com/Dicey-Tech/tutor-contrib-enterprise-catalog/issues",
     },
     license="AGPLv3",
     author="Sofiane Bebert",
-    description="enterprisecatalog plugin for Tutor",
+    description="enterprise-catalog plugin for Tutor",
     long_description=load_readme(),
     packages=find_packages(exclude=["tests*"]),
     include_package_data=True,
-    python_requires=">=3.5",
-    install_requires=["tutor"],
+    install_requires=["tutor>=16.0.0,<17.0.0"],
+    extras_require={"dev": "tutor[dev]>=16.0.0,<17.0.0"},
+    python_requires=">=3.8",
     entry_points={
-        "tutor.plugin.v0": [
-            "enterprisecatalog = tutorenterprisecatalog.plugin"
+        "tutor.plugin.v1": [
+            "enterprise-catalog = tutorenterprisecatalog.plugin"
         ]
     },
     classifiers=[
@@ -57,5 +58,6 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
 )

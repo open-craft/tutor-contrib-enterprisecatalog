@@ -1,3 +1,0 @@
-make migrate
-
-./manage.py update_content_metadata

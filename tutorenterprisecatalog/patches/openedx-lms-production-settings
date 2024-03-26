@@ -1,1 +1,3 @@
-ENTERPRISE_CATALOG_INTERNAL_ROOT_URL = "http://enterprisecatalog:8000"
+ENTERPRISE_CATALOG_INTERNAL_ROOT_URL = "http://enterprise-catalog:8000"
+FEATURES['ENABLE_ENTERPRISE_INTEGRATION'] = True
+ENTERPRISE_API_URL = '{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}/enterprise/api/v1'

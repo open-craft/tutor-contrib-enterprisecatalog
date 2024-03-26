@@ -1,8 +1,8 @@
 # enterprise-catalog
-{{ ENTERPRISECATALOG_HOST }}{$default_site_port} {
+{{ ENTERPRISE_CATALOG_HOST }}{$default_site_port} {
     request_body {
         max_size 10MB
     }
 
-    import proxy "enterprisecatalog:8000"
+    import proxy "enterprise-catalog:8000"
 }

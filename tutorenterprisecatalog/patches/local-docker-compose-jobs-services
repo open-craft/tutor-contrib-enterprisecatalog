@@ -1,7 +1,13 @@
-enterprisecatalog-job:
-  image: {{ ENTERPRISECATALOG_DOCKER_IMAGE }}
+enterprise-catalog-job:
+  image: {{ ENTERPRISE_CATALOG_DOCKER_IMAGE }}
   environment:
     DJANGO_SETTINGS_MODULE: enterprise_catalog.settings.tutor.production
   volumes:
     - ../plugins/enterprisecatalog/apps/settings/tutor:/openedx/enterprise-catalog/enterprise_catalog/settings/tutor:ro
-  depends_on: {{ [("lms", RUN_LMS), ("mysql", RUN_MYSQL)]|list_if }}
+    {%- for mount in iter_mounts(MOUNTS, "enterprise-catalog") %}
+    - {{ mount }}
+    {%- endfor %}
+  depends_on:
+    - discovery
+    - lms
+    {% if RUN_MYSQL %}- mysql{% endif %}

@@ -1,0 +1,56 @@
+# Modify users created with an incorrect email and that might clash with the newly created users
+./manage.py lms shell -c \
+    "from django.contrib.auth import get_user_model;\
+    get_user_model().objects.filter(username='enterprise-catalog').exclude(email='enterprise-catalog@openedx').update(email='enterprise-catalog@openedx')"
+./manage.py lms shell -c \
+    "from django.contrib.auth import get_user_model;\
+    get_user_model().objects.filter(username='enterprise-catalog-worker').exclude(email='enterprise-catalog-worker@openedx').update(email='enterprise-catalog-worker@openedx')"
+
+./manage.py lms manage_user enterprise-catalog enterprise-catalog@openedx --staff --superuser --unusable-password
+./manage.py lms manage_user enterprise-catalog-worker enterprise-catalog-worker@openedx --staff --superuser --unusable-password
+
+# Development client
+./manage.py lms create_dot_application \
+    --grant-type client-credentials \
+    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_CATALOG_HOST }}:8160/complete/edx-oauth2/" \
+    --client-id {{ ENTERPRISE_CATALOG_OAUTH2_KEY_DEV }} \
+    --client-secret {{ ENTERPRISE_CATALOG_OAUTH2_SECRET }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    enterprise-catalog-dev \
+    enterprise-catalog
+./manage.py lms create_dot_application \
+    --grant-type authorization-code \
+    --redirect-uris "http://{{ ENTERPRISE_CATALOG_HOST }}:8160/complete/edx-oauth2/" \
+    --client-id {{ ENTERPRISE_CATALOG_OAUTH2_KEY_SSO_DEV }} \
+    --client-secret {{ ENTERPRISE_CATALOG_OAUTH2_SECRET_SSO }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    enterprise-catalog-sso-dev \
+    enterprise-catalog
+
+# Production client
+./manage.py lms create_dot_application \
+    --grant-type client-credentials \
+    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_CATALOG_HOST }}/complete/edx-oauth2/" \
+    --client-id {{ ENTERPRISE_CATALOG_OAUTH2_KEY }} \
+    --client-secret {{ ENTERPRISE_CATALOG_OAUTH2_SECRET }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    enterprise-catalog \
+    enterprise-catalog
+./manage.py lms create_dot_application \
+    --grant-type authorization-code \
+    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_CATALOG_HOST }}/complete/edx-oauth2/" \
+    --client-id {{ ENTERPRISE_CATALOG_OAUTH2_KEY_SSO }} \
+    --client-secret {{ ENTERPRISE_CATALOG_OAUTH2_SECRET_SSO }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    enterprise-catalog-sso \
+    enterprise-catalog
+
+(./manage.py lms waffle_sample --list | grep use_enterprise_catalog) || ./manage.py lms waffle_sample --create use_enterprise_catalog 100

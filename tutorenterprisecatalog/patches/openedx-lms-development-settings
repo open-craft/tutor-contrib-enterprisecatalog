@@ -1,1 +1,3 @@
-ENTERPRISE_CATALOG_INTERNAL_ROOT_URL = "http://enterprisecatalog.local.overhang.io:8160"
+ENTERPRISE_CATALOG_INTERNAL_ROOT_URL = "http://enterprise-catalog.local.overhang.io:8160"
+FEATURES['ENABLE_ENTERPRISE_INTEGRATION'] = True
+ENTERPRISE_API_URL = '{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}:8000/enterprise/api/v1'

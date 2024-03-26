@@ -1,23 +1,24 @@
-enterprisecatalog:
-  image: {{ ENTERPRISECATALOG_DOCKER_IMAGE }}
+enterprise-catalog:
+  image: {{ ENTERPRISE_CATALOG_DOCKER_IMAGE }}
   environment:
     DJANGO_SETTINGS_MODULE: enterprise_catalog.settings.tutor.production
   volumes:
     - ../plugins/enterprisecatalog/apps/settings/tutor:/openedx/enterprise-catalog/enterprise_catalog/settings/tutor:ro
   restart: unless-stopped
-  depends_on: 
-    - enterprisecatalog-worker
+  depends_on:
+    - discovery
+    - lms
     {% if RUN_MYSQL %}- mysql{% endif %}
 
-enterprisecatalog-worker:
-  image: openedx-enterprise-catalog-worker
-  build:
-    context: ../plugins/enterprisecatalog/build/enterprisecatalog
-    target: openedx-enterprise-catalog-worker
+enterprise-catalog-worker:
+  image: {{ ENTERPRISE_CATALOG_WORKER_DOCKER_IMAGE }}
   environment:
-    DJANGO_SETTINGS_MODULE: enterprise_catalog.settings.tutor.celery_production
+    WORKER_CONFIGURATION_MODULE: enterprise_catalog.settings.tutor.celery_production
   restart: unless-stopped
   volumes:
     - ../plugins/enterprisecatalog/apps/settings/tutor:/openedx/enterprise-catalog/enterprise_catalog/settings/tutor:ro
-  {% if RUN_MYSQL %}depends_on: 
-    - mysql{% endif %}
+  depends_on:
+    - discovery
+    - lms
+    - enterprise-catalog
+    {% if RUN_MYSQL %}- mysql{% endif %}

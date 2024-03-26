@@ -1,4 +1,4 @@
-enterprisecatalog:
+enterprise-catalog:
   environment:
     DJANGO_SETTINGS_MODULE: enterprise_catalog.settings.tutor.development
   command: python3 manage.py runserver 0.0.0.0:8160
@@ -7,11 +7,11 @@ enterprisecatalog:
   networks:
     default:
       aliases:
-        - "{{ ENTERPRISECATALOG_HOST }}"
+        - "{{ ENTERPRISE_CATALOG_HOST }}"
 
-enterprisecatalog-worker:
+enterprise-catalog-worker:
   environment:
     DJANGO_SETTINGS_MODULE: enterprise_catalog.settings.tutor.celery_development
   ports:
     - "8161:8161"
-  command: celery -A enterprise_catalog worker -l DEBUG
+  command: celery --app=enterprise_catalog.celery:app worker -l DEBUG

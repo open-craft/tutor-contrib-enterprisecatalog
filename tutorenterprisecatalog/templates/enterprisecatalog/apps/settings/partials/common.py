@@ -1,9 +1,9 @@
 from enterprise_catalog.settings.utils import get_logger_config
 
-SECRET_KEY = "{{ ENTERPRISECATALOG_SECRET_KEY }}"
+SECRET_KEY = "{{ ENTERPRISE_CATALOG_SECRET_KEY }}"
 ALLOWED_HOSTS = [
-    "enterprisecatalog",
-    "{{ ENTERPRISECATALOG_HOST }}",
+    "enterprise-catalog",
+    "{{ ENTERPRISE_CATALOG_HOST }}",
     "{{ LMS_HOST }}",
 ]
 
@@ -12,9 +12,9 @@ PLATFORM_NAME = "{{ PLATFORM_NAME }}"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "{{ ENTERPRISECATALOG_MYSQL_DATABASE }}",
-        "USER": "{{ ENTERPRISECATALOG_MYSQL_USERNAME }}",
-        "PASSWORD": "{{ ENTERPRISECATALOG_MYSQL_PASSWORD }}",
+        "NAME": "{{ ENTERPRISE_CATALOG_MYSQL_DATABASE }}",
+        "USER": "{{ ENTERPRISE_CATALOG_MYSQL_USERNAME }}",
+        "PASSWORD": "{{ ENTERPRISE_CATALOG_MYSQL_PASSWORD }}",
         "HOST": "{{ MYSQL_HOST }}",
         "PORT": "{{ MYSQL_PORT }}",
         "OPTIONS": {
@@ -26,8 +26,8 @@ DATABASES = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "KEY_PREFIX": "enterprisecatalog",
-        "LOCATION": "redis://{% if REDIS_USERNAME and REDIS_PASSWORD %}{{ REDIS_USERNAME }}:{{ REDIS_PASSWORD }}{% endif %}@{{ REDIS_HOST }}:{{ REDIS_PORT }}/{{ ENTERPRISECATALOG_CACHE_REDIS_DB }}",
+        "KEY_PREFIX": "enterprise-catalog",
+        "LOCATION": "redis://{% if REDIS_USERNAME and REDIS_PASSWORD %}{{ REDIS_USERNAME }}:{{ REDIS_PASSWORD }}{% endif %}@{{ REDIS_HOST }}:{{ REDIS_PORT }}/{{ ENTERPRISE_CATALOG_CACHE_REDIS_DB }}",
     }
 }
 
@@ -40,23 +40,16 @@ EMAIL_USE_TLS = {{ SMTP_USE_TLS }}
 
 
 # Get rid of the "local" handler
+if "local" in LOGGING["handlers"]:
+    LOGGING["handlers"].pop("local")
 for logger in LOGGING["loggers"].values():
     if "local" in logger["handlers"]:
         logger["handlers"].remove("local")
-LOGGING = get_logger_config(
-    log_dir="/var/log",
-    edx_filename="enterprisecatalog.log",
-    dev_env=True,
-    debug=False,
-)
 # Decrease verbosity of algolia logger
 LOGGING["loggers"]["algoliasearch_django"] = {"level": "WARNING"}
 
-# Generic OAuth2 variables irrespective of SSO/backend service key types.
-OAUTH2_PROVIDER_URL = "http://lms:8000/oauth2"
-
 OAUTH_API_TIMEOUT = 5
-{% set jwt_rsa_key = rsa_import_key(JWT_RSA_PRIVATE_KEY) %}
+{% set jwt_rsa_key | rsa_import_key %}{{ JWT_RSA_PRIVATE_KEY }}{% endset %}
 import json
 JWT_AUTH["JWT_ISSUER"] = "{{ JWT_COMMON_ISSUER }}"
 JWT_AUTH["JWT_AUDIENCE"] = "{{ JWT_COMMON_AUDIENCE }}"
@@ -99,4 +92,4 @@ CELERY_BROKER_URL = "{}://{}:{}@{}/{}".format(
     CELERY_BROKER_VHOST
 )
 
-{{ patch("enterprisecatalog-common-settings") }}
+{{ patch("enterprise-catalog-common-settings") }}
