@@ -22,6 +22,7 @@ config = {
         "MYSQL_PASSWORD": "{{ 8|random_string }}",
         "SECRET_KEY": "{{ 24|random_string }}",
         "OAUTH2_SECRET": "{{ 8|random_string }}",
+        "BACKEND_OAUTH2_SECRET": "{{ 8|random_string }}",
         "OAUTH2_SECRET_SSO": "{{ 8|random_string }}",
     },
     "defaults": {
@@ -36,6 +37,8 @@ config = {
         "OAUTH2_KEY_DEV": "enterprise-catalog-dev",
         "OAUTH2_KEY_SSO": "enterprise-catalog-sso",
         "OAUTH2_KEY_SSO_DEV": "enterprise-catalog-sso-dev",
+        "BACKEND_OAUTH2_KEY": "enterprise-backend",
+        "BACKEND_OAUTH2_KEY_DEV": "enterprise-backend-dev",
         "CACHE_REDIS_DB": "{{ OPENEDX_CACHE_REDIS_DB }}",
         "REPOSITORY": "https://github.com/openedx/enterprise-catalog.git",
         "REPOSITORY_VERSION": "{{ OPENEDX_COMMON_VERSION }}",

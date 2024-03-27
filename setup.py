@@ -25,12 +25,12 @@ ABOUT = load_about()
 
 
 setup(
-    name="tutor-contrib-enterprise-catalog",
+    name="tutor-contrib-enterprisecatalog",
     version=ABOUT["__version__"],
-    url="https://github.com/Dicey-Tech/tutor-contrib-enterprise-catalog",
+    url="https://github.com/Dicey-Tech/tutor-contrib-enterprisecatalog",
     project_urls={
-        "Code": "https://github.com/Dicey-Tech/tutor-contrib-enterprise-catalog",
-        "Issue tracker": "https://github.com/Dicey-Tech/tutor-contrib-enterprise-catalog/issues",
+        "Code": "https://github.com/Dicey-Tech/tutor-contrib-enterprisecatalog",
+        "Issue tracker": "https://github.com/Dicey-Tech/tutor-contrib-enterprisecatalog/issues",
     },
     license="AGPLv3",
     author="Sofiane Bebert",

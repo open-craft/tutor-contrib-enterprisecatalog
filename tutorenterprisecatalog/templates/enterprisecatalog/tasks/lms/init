@@ -4,10 +4,24 @@
     get_user_model().objects.filter(username='enterprise-catalog').exclude(email='enterprise-catalog@openedx').update(email='enterprise-catalog@openedx')"
 ./manage.py lms shell -c \
     "from django.contrib.auth import get_user_model;\
+    get_user_model().objects.filter(username='enterprise_worker').exclude(email='enterprise_worker@openedx').update(email='enterprise_worker@openedx')"
+./manage.py lms shell -c \
+    "from django.contrib.auth import get_user_model;\
     get_user_model().objects.filter(username='enterprise-catalog-worker').exclude(email='enterprise-catalog-worker@openedx').update(email='enterprise-catalog-worker@openedx')"
 
 ./manage.py lms manage_user enterprise-catalog enterprise-catalog@openedx --staff --superuser --unusable-password
 ./manage.py lms manage_user enterprise-catalog-worker enterprise-catalog-worker@openedx --staff --superuser --unusable-password
+
+# Enterprise backend user and permissions
+./manage.py lms manage_user enterprise_worker enterprise_worker@openedx --staff --superuser --unusable-password
+./manage.py lms shell -c \
+    "from django.contrib.auth import get_user_model;\
+    from django.contrib.auth.models import Permission;\
+    enterprise_worker = get_user_model().objects.get(username='enterprise_worker');\
+    enterprise_model_permissions = list(Permission.objects.filter(content_type__app_label='enterprise'));\
+    enterprise_worker.user_permissions.add(*enterprise_model_permissions);\
+    enterprise_worker.save()
+"
 
 # Development client
 ./manage.py lms create_dot_application \
@@ -30,6 +44,16 @@
     --update \
     enterprise-catalog-sso-dev \
     enterprise-catalog
+# For edx-enterprise to use lms as backend
+./manage.py lms create_dot_application \
+    --grant-type client-credentials \
+    --client-id {{ ENTERPRISE_CATALOG_BACKEND_OAUTH2_KEY_DEV }} \
+    --client-secret {{ ENTERPRISE_CATALOG_BACKEND_OAUTH2_SECRET }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    enterprise-backend-dev \
+    enterprise_worker
 
 # Production client
 ./manage.py lms create_dot_application \
@@ -52,5 +76,15 @@
     --update \
     enterprise-catalog-sso \
     enterprise-catalog
+# For edx-enterprise to use lms as backend
+./manage.py lms create_dot_application \
+    --grant-type client-credentials \
+    --client-id {{ ENTERPRISE_CATALOG_BACKEND_OAUTH2_KEY }} \
+    --client-secret {{ ENTERPRISE_CATALOG_BACKEND_OAUTH2_SECRET }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    enterprise-backend \
+    enterprise_worker
 
 (./manage.py lms waffle_sample --list | grep use_enterprise_catalog) || ./manage.py lms waffle_sample --create use_enterprise_catalog 100

@@ -6,7 +6,7 @@ Installation
 
 ::
 
-    pip install git+https://github.com/Dicey-Tech/tutor-contrib-enterprise-catalog
+    pip install git+https://github.com/Dicey-Tech/tutor-contrib-enterprisecatalog
 
 Usage
 -----
