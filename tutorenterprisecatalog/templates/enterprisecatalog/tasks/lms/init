@@ -1,16 +1,12 @@
 # Modify users created with an incorrect email and that might clash with the newly created users
 ./manage.py lms shell -c \
     "from django.contrib.auth import get_user_model;\
-    get_user_model().objects.filter(username='enterprise-catalog').exclude(email='enterprise-catalog@openedx').update(email='enterprise-catalog@openedx')"
-./manage.py lms shell -c \
-    "from django.contrib.auth import get_user_model;\
     get_user_model().objects.filter(username='enterprise_worker').exclude(email='enterprise_worker@openedx').update(email='enterprise_worker@openedx')"
 ./manage.py lms shell -c \
     "from django.contrib.auth import get_user_model;\
-    get_user_model().objects.filter(username='enterprise-catalog-worker').exclude(email='enterprise-catalog-worker@openedx').update(email='enterprise-catalog-worker@openedx')"
+    get_user_model().objects.filter(username='enterprise_catalog_worker').exclude(email='enterprise_catalog_worker@openedx').update(email='enterprise_catalog_worker@openedx')"
 
-./manage.py lms manage_user enterprise-catalog enterprise-catalog@openedx --staff --superuser --unusable-password
-./manage.py lms manage_user enterprise-catalog-worker enterprise-catalog-worker@openedx --staff --superuser --unusable-password
+./manage.py lms manage_user enterprise_catalog_worker enterprise_catalog_worker@openedx --staff --unusable-password
 
 # Enterprise backend user and permissions
 ./manage.py lms manage_user enterprise_worker enterprise_worker@openedx --staff --superuser --unusable-password
