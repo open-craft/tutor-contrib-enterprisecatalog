@@ -8,6 +8,7 @@ enterprise-catalog:
   depends_on:
     - discovery
     - lms
+    - license-manager
     {% if RUN_MYSQL %}- mysql{% endif %}
 
 enterprise-catalog-worker:
@@ -21,4 +22,42 @@ enterprise-catalog-worker:
     - discovery
     - lms
     - enterprise-catalog
+    {% if RUN_MYSQL %}- mysql{% endif %}
+
+license-manager:
+  image: {{ LICENSE_MANAGER_DOCKER_IMAGE }}
+  environment:
+    DJANGO_SETTINGS_MODULE: license_manager.settings.tutor.production
+  volumes:
+    - ../plugins/licensemanager/apps/settings/tutor:/openedx/license-manager/license_manager/settings/tutor:ro
+  restart: unless-stopped
+  depends_on:
+    - discovery
+    - lms
+    {% if RUN_MYSQL %}- mysql{% endif %}
+
+license-manager-worker:
+  image: {{ LICENSE_MANAGER_WORKER_DOCKER_IMAGE }}
+  environment:
+    WORKER_CONFIGURATION_MODULE: license_manager.settings.tutor.celery_production
+  restart: unless-stopped
+  volumes:
+    - ../plugins/licensemanager/apps/settings/tutor:/openedx/license-manager/license_manager/settings/tutor:ro
+  depends_on:
+    - discovery
+    - lms
+    - license-manager
+    {% if RUN_MYSQL %}- mysql{% endif %}
+
+license-manager-bulk-enrollment-worker:
+  image: {{ LICENSE_MANAGER_BULK_ENROLLMENT_WORKER_DOCKER_IMAGE }}
+  environment:
+    WORKER_CONFIGURATION_MODULE: license_manager.settings.tutor.celery_production
+  restart: unless-stopped
+  volumes:
+    - ../plugins/licensemanager/apps/settings/tutor:/openedx/license-manager/license_manager/settings/tutor:ro
+  depends_on:
+    - discovery
+    - lms
+    - license-manager
     {% if RUN_MYSQL %}- mysql{% endif %}

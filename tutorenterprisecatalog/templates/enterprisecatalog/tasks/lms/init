@@ -29,7 +29,7 @@
     --skip-authorization \
     --update \
     enterprise-catalog-dev \
-    enterprise-catalog
+    enterprise_catalog_worker
 ./manage.py lms create_dot_application \
     --grant-type authorization-code \
     --redirect-uris "http://{{ ENTERPRISE_CATALOG_HOST }}:8160/complete/edx-oauth2/" \
@@ -39,7 +39,7 @@
     --skip-authorization \
     --update \
     enterprise-catalog-sso-dev \
-    enterprise-catalog
+    enterprise_catalog_worker
 # For edx-enterprise to use lms as backend
 ./manage.py lms create_dot_application \
     --grant-type client-credentials \
@@ -61,7 +61,7 @@
     --skip-authorization \
     --update \
     enterprise-catalog \
-    enterprise-catalog
+    enterprise_catalog_worker
 ./manage.py lms create_dot_application \
     --grant-type authorization-code \
     --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_CATALOG_HOST }}/complete/edx-oauth2/" \
@@ -71,7 +71,7 @@
     --skip-authorization \
     --update \
     enterprise-catalog-sso \
-    enterprise-catalog
+    enterprise_catalog_worker
 # For edx-enterprise to use lms as backend
 ./manage.py lms create_dot_application \
     --grant-type client-credentials \

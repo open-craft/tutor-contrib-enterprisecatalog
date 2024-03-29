@@ -15,3 +15,28 @@ enterprise-catalog-worker:
   ports:
     - "8161:8161"
   command: celery --app=enterprise_catalog.celery:app worker -l DEBUG
+
+license-manager:
+  environment:
+    DJANGO_SETTINGS_MODULE: license_manager.settings.tutor.development
+  command: python3 manage.py runserver 0.0.0.0:8170
+  ports:
+    - "8170:8170"
+  networks:
+    default:
+      aliases:
+        - "{{ LICENSE_MANAGER_HOST }}"
+
+license-manager-worker:
+  environment:
+    DJANGO_SETTINGS_MODULE: license_manager.settings.tutor.celery_development
+  ports:
+    - "8171:8171"
+  command: celery --app=license_manager.celery:app worker -Q license_manager.default -l DEBUG
+
+license-manager-bulk-enrollment-worker:
+  environment:
+    DJANGO_SETTINGS_MODULE: license_manager.settings.tutor.celery_development
+  ports:
+    - "8172:8172"
+  command: celery --app=license_manager.celery:app worker -Q license_manager.bulk_enrollment -l DEBUG

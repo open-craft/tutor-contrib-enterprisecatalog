@@ -10,4 +10,19 @@ enterprise-catalog-job:
   depends_on:
     - discovery
     - lms
+    - license-manager
+    {% if RUN_MYSQL %}- mysql{% endif %}
+
+license-manager-job:
+  image: {{ LICENSE_MANAGER_DOCKER_IMAGE }}
+  environment:
+    DJANGO_SETTINGS_MODULE: license_manager.settings.tutor.production
+  volumes:
+    - ../plugins/licensemanager/apps/settings/tutor:/openedx/license-manager/license_manager/settings/tutor:ro
+    {%- for mount in iter_mounts(MOUNTS, "license-manager") %}
+    - {{ mount }}
+    {%- endfor %}
+  depends_on:
+    - discovery
+    - lms
     {% if RUN_MYSQL %}- mysql{% endif %}

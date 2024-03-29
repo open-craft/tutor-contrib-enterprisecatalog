@@ -13,11 +13,8 @@ if __version_suffix__:
     __version__ += "-" + __version_suffix__
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-REPO_NAME = "enterprise-catalog"
-APP_NAME = "enterprise-catalog"
-MFE_NAME = "learner-portal-enterprise"
 
-config = {
+catalog_config = {
     "unique": {
         "MYSQL_PASSWORD": "{{ 8|random_string }}",
         "SECRET_KEY": "{{ 24|random_string }}",
@@ -47,58 +44,129 @@ config = {
         "ALGOLIA_INDEX_NAME": "",
         "ALGOLIA_INDEX_NAME_JOBS": "",
     },
+    # Include information to be used by loop below
+    "repo_name": "enterprise-catalog",
+    "app_name": "enterprise-catalog",
+    "init_tasks": ("mysql", "lms", "enterprise-catalog"),
+    "templates_dir": "enterprisecatalog",
 }
 
-@MFE_APPS.add()
-def _add_enterprise_catalog_mfe_apps(
-    apps: dict[str, MFE_ATTRS_TYPE]
-) -> dict[str, MFE_ATTRS_TYPE]:
-    apps.update(
-        {
-            MFE_NAME: {
-                "repository": "https://github.com/openedx/frontend-app-learner-portal-enterprise.git",
-                "port": 8734,
-                "version": "master",
-            },
-        }
-    )
-    return apps
-
-# Initialization tasks
-init_tasks = ("mysql", "lms", "enterprise-catalog")
-for service in init_tasks:
-    with open(
-        os.path.join(
-            pkg_resources.resource_filename("tutorenterprisecatalog", "templates"),
-            "enterprisecatalog",
-            "tasks",
-            service,
-            "init",
-        ),
-        encoding="utf8",
-    ) as fi:
-        tutor_hooks.Filters.CLI_DO_INIT_TASKS.add_item(
-            (
-                service,
-                fi.read(),
-            )
-        )
+license_manager_config = {
+    "unique": {
+        "MYSQL_PASSWORD": "{{ 8|random_string }}",
+        "SECRET_KEY": "{{ 24|random_string }}",
+        "OAUTH2_SECRET": "{{ 8|random_string }}",
+        "OAUTH2_SECRET_SSO": "{{ 8|random_string }}",
+    },
+    "defaults": {
+        "VERSION": __version__,
+        "DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-license-manager:{{ LICENSE_MANAGER_VERSION }}",
+        "WORKER_DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-license-manager-worker:{{ LICENSE_MANAGER_VERSION }}",
+        "BULK_ENROLLMENT_WORKER_DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-license-manager-bulk-enrollment-worker:{{ LICENSE_MANAGER_VERSION }}",
+        "HOST": "license-manager.{{ LMS_HOST }}",
+        "EXTRA_PIP_REQUIREMENTS": [],
+        "MYSQL_DATABASE": "licensemanager",
+        "MYSQL_USERNAME": "licensemanager",
+        "OAUTH2_KEY": "license-manager",
+        "OAUTH2_KEY_DEV": "license-manager-dev",
+        "OAUTH2_KEY_SSO": "license-manager-sso",
+        "OAUTH2_KEY_SSO_DEV": "license-manager-sso-dev",
+        "CACHE_REDIS_DB": "{{ OPENEDX_CACHE_REDIS_DB }}",
+        "REPOSITORY": "https://github.com/openedx/license-manager.git",
+        "REPOSITORY_VERSION": "{{ OPENEDX_COMMON_VERSION }}",
+    },
+    # Include information to be used by loop below
+    "repo_name": "license-manager",
+    "app_name": "license-manager",
+    "init_tasks": ("mysql", "lms", "license-manager"),
+    "templates_dir": "licensemanager",
+}
 
 # Add the "templates" folder as a template root
 tutor_hooks.Filters.ENV_TEMPLATE_ROOTS.add_item(
     pkg_resources.resource_filename("tutorenterprisecatalog", "templates")
 )
-# Render the "build" and "apps" folders
-tutor_hooks.Filters.ENV_TEMPLATE_TARGETS.add_items(
-    [
-        ("enterprisecatalog/build", "plugins"),
-        ("enterprisecatalog/apps", "plugins"),
-    ],
-)
+
+configurations = [
+    ("ENTERPRISE_CATALOG_", catalog_config),
+    ("LICENSE_MANAGER_", license_manager_config),
+]
+
+for prefix, config in configurations:
+    # Add configuration entries
+    tutor_hooks.Filters.CONFIG_DEFAULTS.add_items(
+        [(f"{prefix}{key}", value) for key, value in config.get("defaults", {}).items()]
+    )
+    tutor_hooks.Filters.CONFIG_UNIQUE.add_items(
+        [(f"{prefix}{key}", value) for key, value in config.get("unique", {}).items()]
+    )
+    tutor_hooks.Filters.CONFIG_OVERRIDES.add_items(list(config.get("overrides", {}).items()))
+
+    # Render the "build" and "apps" folders
+    tutor_hooks.Filters.ENV_TEMPLATE_TARGETS.add_items(
+        [
+            (f"{config['templates_dir']}/build", "plugins"),
+            (f"{config['templates_dir']}/apps", "plugins"),
+        ],
+    )
+
+    # Initialization tasks
+    for service in config["init_tasks"]:
+        with open(
+            os.path.join(
+                pkg_resources.resource_filename("tutorenterprisecatalog", "templates"),
+                config["templates_dir"],
+                "tasks",
+                service,
+                "init",
+            ),
+            encoding="utf8",
+        ) as fi:
+            tutor_hooks.Filters.CLI_DO_INIT_TASKS.add_item(
+                (
+                    service,
+                    fi.read(),
+                )
+            )
+
+
+# Automount /openedx/enterprise-catalog folder from the container
+@tutor_hooks.Filters.COMPOSE_MOUNTS.add()
+def _mount_repositories(mounts: list[tuple[str, str]], name: str) -> list[tuple[str, str]]:
+    repos = {config["repo_name"]: config["app_name"] for _, config in configurations}
+    if name in repos:
+        mounts.append((repos[name], f"/openedx/{name}"))
+    return mounts
+
+
+# Bind-mount repo at build-time, both for prod and dev images
+@tutor_hooks.Filters.IMAGES_BUILD_MOUNTS.add()
+def _mount_repositories_on_build(
+    mounts: list[tuple[str, str]], host_path: str
+) -> list[tuple[str, str]]:
+    repos = {config["repo_name"]: config["app_name"] for _, config in configurations}
+    path_basename = os.path.basename(host_path)
+    if path_basename in repos:
+        mounts.append((repos[path_basename], f"{repos[path_basename]}-src"))
+        mounts.append((f"{repos[path_basename]}-dev", f"{repos[path_basename]}-src"))
+    return mounts
+
+
+@tutor_hooks.Filters.APP_PUBLIC_HOSTS.add()
+def _print_apps_public_hosts(
+    hosts: list[str], context_name: t.Literal["local", "dev"]
+) -> list[str]:
+    if context_name == "dev":
+        hosts += ["{{ ENTERPRISE_CATALOG_HOST }}:8160", "{{ LICENSE_MANAGER_HOST }}:8170"]
+    else:
+        hosts += ["{{ ENTERPRISE_CATALOG_HOST }}", "{{ LICENSE_MANAGER_HOST }}"]
+    return hosts
+
 
 # Image management
 tutor_hooks.Filters.IMAGES_BUILD.add_items(
     [
+        # Enterprise catalog images
         (
             "enterprise-catalog-worker",
             ("plugins", "enterprisecatalog", "build", "enterprisecatalog"),
@@ -109,6 +177,25 @@ tutor_hooks.Filters.IMAGES_BUILD.add_items(
             "enterprise-catalog",
             ("plugins", "enterprisecatalog", "build", "enterprisecatalog"),
             "{{ ENTERPRISE_CATALOG_DOCKER_IMAGE }}",
+            (),
+        ),
+        # License manager images
+        (
+            "license-manager-worker",
+            ("plugins", "licensemanager", "build", "licensemanager"),
+            "{{ LICENSE_MANAGER_WORKER_DOCKER_IMAGE }}",
+            ("--target=license-manager-worker-dev",),
+        ),
+        (
+            "license-manager-bulk-enrollment-worker",
+            ("plugins", "licensemanager", "build", "licensemanager"),
+            "{{ LICENSE_MANAGER_BULK_ENROLLMENT_WORKER_DOCKER_IMAGE }}",
+            ("--target=license-manager-bulk-enrollment-worker-dev",),
+        ),
+        (
+            "license-manager",
+            ("plugins", "licensemanager", "build", "licensemanager"),
+            "{{ LICENSE_MANAGER_DOCKER_IMAGE }}",
             (),
         ),
     ]
@@ -122,7 +209,19 @@ tutor_hooks.Filters.IMAGES_PULL.add_items(
         (
             "enterprise-catalog-worker",
             "{{ ENTERPRISE_CATALOG_WORKER_DOCKER_IMAGE }}",
-        )
+        ),
+        (
+            "license-manager",
+            "{{ LICENSE_MANAGER_DOCKER_IMAGE }}",
+        ),
+        (
+            "license-manager-worker",
+            "{{ LICENSE_MANAGER_WORKER_DOCKER_IMAGE }}",
+        ),
+        (
+            "license-manager-bulk-enrollment-worker",
+            "{{ LICENSE_MANAGER_BULK_ENROLLMENT_WORKER_DOCKER_IMAGE }}",
+        ),
     ]
 )
 tutor_hooks.Filters.IMAGES_PUSH.add_items(
@@ -134,43 +233,50 @@ tutor_hooks.Filters.IMAGES_PUSH.add_items(
         (
             "enterprise-catalog-worker",
             "{{ ENTERPRISE_CATALOG_WORKER_DOCKER_IMAGE }}",
-        )
+        ),
+        (
+            "license-manager",
+            "{{ LICENSE_MANAGER_DOCKER_IMAGE }}",
+        ),
+        (
+            "license-manager-worker",
+            "{{ LICENSE_MANAGER_WORKER_DOCKER_IMAGE }}",
+        ),
+        (
+            "license-manager-bulk-enrollment-worker",
+            "{{ LICENSE_MANAGER_BULK_ENROLLMENT_WORKER_DOCKER_IMAGE }}",
+        ),
     ]
-
 )
 
-tag = "{{ DOCKER_REGISTRY }}open-craft/openedx-" + MFE_NAME + "-dev:{{ MFE_VERSION }}"
-tutor_hooks.Filters.IMAGES_BUILD.add_item(
-    (
-        f"{MFE_NAME}-dev",
-        ("plugins", "mfe", "build", "mfe"),
-        tag,
-        (f"--target={MFE_NAME}-dev",),
+MFES = {
+    "learner-portal-enterprise": {
+        "repository": "https://github.com/openedx/frontend-app-learner-portal-enterprise.git",
+        "port": 8734,
+        "version": "master",
+    },
+}
+
+
+@MFE_APPS.add()
+def _add_enterprise_catalog_mfe_apps(apps: dict[str, MFE_ATTRS_TYPE]) -> dict[str, MFE_ATTRS_TYPE]:
+    apps.update(MFES)
+    return apps
+
+
+for mfe_name in MFES:
+    tag = "{{ DOCKER_REGISTRY }}open-craft/openedx-" + mfe_name + "-dev:{{ MFE_VERSION }}"
+    tutor_hooks.Filters.IMAGES_BUILD.add_item(
+        (
+            f"{mfe_name}-dev",
+            ("plugins", "mfe", "build", "mfe"),
+            tag,
+            (f"--target={mfe_name}-dev",),
+        )
     )
-)
-tutor_hooks.Filters.IMAGES_PULL.add_item((f"{MFE_NAME}-dev", tag))
-tutor_hooks.Filters.IMAGES_PUSH.add_item((f"{MFE_NAME}-dev", tag))
+    tutor_hooks.Filters.IMAGES_PULL.add_item((f"{mfe_name}-dev", tag))
+    tutor_hooks.Filters.IMAGES_PUSH.add_item((f"{mfe_name}-dev", tag))
 
-# Automount /openedx/enterprise-catalog folder from the container
-@tutor_hooks.Filters.COMPOSE_MOUNTS.add()
-def _mount_enterprise_catalog(
-    mounts: list[tuple[str, str]], name: str
-) -> list[tuple[str, str]]:
-    if name == REPO_NAME:
-        mounts.append((APP_NAME, "/openedx/enterprise-catalog"))
-    return mounts
-
-
-# Bind-mount repo at build-time, both for prod and dev images
-@tutor_hooks.Filters.IMAGES_BUILD_MOUNTS.add()
-def _mount_enterprise_catalog_on_build(
-    mounts: list[tuple[str, str]], host_path: str
-) -> list[tuple[str, str]]:
-    path_basename = os.path.basename(host_path)
-    if path_basename == REPO_NAME:
-        mounts.append((APP_NAME, f"{APP_NAME}-src"))
-        mounts.append((f"{APP_NAME}-dev", f"{APP_NAME}-src"))
-    return mounts
 
 # Load patches from files
 for path in glob(
@@ -180,27 +286,4 @@ for path in glob(
     )
 ):
     with open(path, encoding="utf-8") as patch_file:
-        tutor_hooks.Filters.ENV_PATCHES.add_item(
-            (os.path.basename(path), patch_file.read())
-        )
-
-# Add configuration entries
-tutor_hooks.Filters.CONFIG_DEFAULTS.add_items(
-    [(f"ENTERPRISE_CATALOG_{key}", value) for key, value in config.get("defaults", {}).items()]
-)
-tutor_hooks.Filters.CONFIG_UNIQUE.add_items(
-    [(f"ENTERPRISE_CATALOG_{key}", value) for key, value in config.get("unique", {}).items()]
-)
-tutor_hooks.Filters.CONFIG_OVERRIDES.add_items(
-    list(config.get("overrides", {}).items())
-)
-
-@tutor_hooks.Filters.APP_PUBLIC_HOSTS.add()
-def _print_enterprise_catalog_public_hosts(
-    hosts: list[str], context_name: t.Literal["local", "dev"]
-) -> list[str]:
-    if context_name == "dev":
-        hosts += ["{{ ENTERPRISE_CATALOG_HOST }}:8160"]
-    else:
-        hosts += ["{{ ENTERPRISE_CATALOG_HOST }}"]
-    return hosts
+        tutor_hooks.Filters.ENV_PATCHES.add_item((os.path.basename(path), patch_file.read()))

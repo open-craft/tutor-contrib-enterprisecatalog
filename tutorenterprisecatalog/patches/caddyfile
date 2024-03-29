@@ -6,3 +6,11 @@
 
     import proxy "enterprise-catalog:8000"
 }
+
+{{ LICENSE_MANAGER_HOST }}{$default_site_port} {
+    request_body {
+        max_size 10MB
+    }
+
+    import proxy "license-manager:8000"
+}
