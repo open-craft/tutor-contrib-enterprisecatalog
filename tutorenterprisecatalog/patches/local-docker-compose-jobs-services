@@ -26,3 +26,33 @@ license-manager-job:
     - discovery
     - lms
     {% if RUN_MYSQL %}- mysql{% endif %}
+
+enterprise-access-job:
+  image: {{ ENTERPRISE_ACCESS_DOCKER_IMAGE }}
+  environment:
+    DJANGO_SETTINGS_MODULE: enterprise_access.settings.tutor.production
+  volumes:
+    - ../plugins/enterpriseaccess/apps/settings/tutor:/openedx/enterprise-access/enterprise_access/settings/tutor:ro
+    {%- for mount in iter_mounts(MOUNTS, "enterprise-access") %}
+    - {{ mount }}
+    {%- endfor %}
+  depends_on:
+    - discovery
+    - lms
+    - license-manager
+    - enterprise-catalog
+    {% if RUN_MYSQL %}- mysql{% endif %}
+
+enterprise-subsidy-job:
+  image: {{ ENTERPRISE_SUBSIDY_DOCKER_IMAGE }}
+  environment:
+    DJANGO_SETTINGS_MODULE: enterprise_subsidy.settings.tutor.production
+  volumes:
+    - ../plugins/enterprisesubsidy/apps/settings/tutor:/openedx/enterprise-subsidy/enterprise_subsidy/settings/tutor:ro
+    {%- for mount in iter_mounts(MOUNTS, "enterprise-subsidy") %}
+    - {{ mount }}
+    {%- endfor %}
+  depends_on:
+    - lms
+    - enterprise-catalog
+    {% if RUN_MYSQL %}- mysql{% endif %}

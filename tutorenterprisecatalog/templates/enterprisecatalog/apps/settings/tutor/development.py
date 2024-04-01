@@ -22,7 +22,7 @@ LICENSE_MANAGER_BASE_URL = "http://{{ LICENSE_MANAGER_HOST }}:8170"
 {% for app_name, app in iter_mfes() %}
 {% if app_name in ["learner-portal-enterprise", "admin-portal-enterprise"] %}
 CORS_ORIGIN_WHITELIST.append("http://{{ MFE_HOST }}:{{ app['port'] }}")
-CSRF_TRUSTED_ORIGINS.append("{{ MFE_HOST }}:{{ app['port'] }}")
+CSRF_TRUSTED_ORIGINS.append("http://{{ MFE_HOST }}:{{ app['port'] }}")
 {% endif %}
 {% endfor %}
 

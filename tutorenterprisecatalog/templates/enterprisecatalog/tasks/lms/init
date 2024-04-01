@@ -16,8 +16,7 @@
     enterprise_worker = get_user_model().objects.get(username='enterprise_worker');\
     enterprise_model_permissions = list(Permission.objects.filter(content_type__app_label='enterprise'));\
     enterprise_worker.user_permissions.add(*enterprise_model_permissions);\
-    enterprise_worker.save()
-"
+    enterprise_worker.save()"
 
 # Development client
 ./manage.py lms create_dot_application \

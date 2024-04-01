@@ -24,6 +24,6 @@ LICENSE_MANAGER_BASE_URL = "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}:
 CORS_ORIGIN_WHITELIST = list(CORS_ORIGIN_WHITELIST) + [
     "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ MFE_HOST }}",
 ]
-CSRF_TRUSTED_ORIGINS.append("{{ MFE_HOST }}")
+CSRF_TRUSTED_ORIGINS.append("{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ MFE_HOST }}")
 
 {{ patch("enterprise-catalog-production-settings") }}

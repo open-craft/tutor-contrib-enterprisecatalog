@@ -82,6 +82,65 @@ license_manager_config = {
     "templates_dir": "licensemanager",
 }
 
+access_config = {
+    "unique": {
+        "MYSQL_PASSWORD": "{{ 8|random_string }}",
+        "SECRET_KEY": "{{ 24|random_string }}",
+        "OAUTH2_SECRET": "{{ 8|random_string }}",
+        "OAUTH2_SECRET_SSO": "{{ 8|random_string }}",
+    },
+    "defaults": {
+        "VERSION": __version__,
+        "DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-enterprise-access:{{ ENTERPRISE_ACCESS_VERSION }}",
+        "WORKER_DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-enterprise-access-worker:{{ ENTERPRISE_ACCESS_VERSION }}",
+        "HOST": "enterprise-access.{{ LMS_HOST }}",
+        "EXTRA_PIP_REQUIREMENTS": [],
+        "MYSQL_DATABASE": "enterpriseaccess",
+        "MYSQL_USERNAME": "enterpriseaccess",
+        "OAUTH2_KEY": "enterprise-access",
+        "OAUTH2_KEY_DEV": "enterprise-access-dev",
+        "OAUTH2_KEY_SSO": "enterprise-access-sso",
+        "OAUTH2_KEY_SSO_DEV": "enterprise-access-sso-dev",
+        "CACHE_REDIS_DB": "{{ OPENEDX_CACHE_REDIS_DB }}",
+        "REPOSITORY": "https://github.com/openedx/enterprise-access.git",
+        "REPOSITORY_VERSION": "{{ OPENEDX_COMMON_VERSION }}",
+    },
+    # Include information to be used by loop below
+    "repo_name": "enterprise-access",
+    "app_name": "enterprise-access",
+    "init_tasks": ("mysql", "lms", "enterprise-access"),
+    "templates_dir": "enterpriseaccess",
+}
+
+subsidy_config = {
+    "unique": {
+        "MYSQL_PASSWORD": "{{ 8|random_string }}",
+        "SECRET_KEY": "{{ 24|random_string }}",
+        "OAUTH2_SECRET": "{{ 8|random_string }}",
+        "OAUTH2_SECRET_SSO": "{{ 8|random_string }}",
+    },
+    "defaults": {
+        "VERSION": __version__,
+        "DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-enterprise-subsidy:{{ ENTERPRISE_SUBSIDY_VERSION }}",
+        "HOST": "enterprise-subsidy.{{ LMS_HOST }}",
+        "EXTRA_PIP_REQUIREMENTS": [],
+        "MYSQL_DATABASE": "enterprisesubsidy",
+        "MYSQL_USERNAME": "enterprisesubsidy",
+        "OAUTH2_KEY": "enterprise-subsidy",
+        "OAUTH2_KEY_DEV": "enterprise-subsidy-dev",
+        "OAUTH2_KEY_SSO": "enterprise-subsidy-sso",
+        "OAUTH2_KEY_SSO_DEV": "enterprise-subsidy-sso-dev",
+        "CACHE_REDIS_DB": "{{ OPENEDX_CACHE_REDIS_DB }}",
+        "REPOSITORY": "https://github.com/openedx/enterprise-subsidy.git",
+        "REPOSITORY_VERSION": "main",
+    },
+    # Include information to be used by loop below
+    "repo_name": "enterprise-subsidy",
+    "app_name": "enterprise-subsidy",
+    "init_tasks": ("mysql", "lms", "enterprise-subsidy"),
+    "templates_dir": "enterprisesubsidy",
+}
+
 # Add the "templates" folder as a template root
 tutor_hooks.Filters.ENV_TEMPLATE_ROOTS.add_item(
     pkg_resources.resource_filename("tutorenterprisecatalog", "templates")
@@ -90,6 +149,8 @@ tutor_hooks.Filters.ENV_TEMPLATE_ROOTS.add_item(
 configurations = [
     ("ENTERPRISE_CATALOG_", catalog_config),
     ("LICENSE_MANAGER_", license_manager_config),
+    ("ENTERPRISE_ACCESS_", access_config),
+    ("ENTERPRISE_SUBSIDY_", subsidy_config),
 ]
 
 for prefix, config in configurations:
@@ -157,9 +218,19 @@ def _print_apps_public_hosts(
     hosts: list[str], context_name: t.Literal["local", "dev"]
 ) -> list[str]:
     if context_name == "dev":
-        hosts += ["{{ ENTERPRISE_CATALOG_HOST }}:8160", "{{ LICENSE_MANAGER_HOST }}:8170"]
+        hosts += [
+            "{{ ENTERPRISE_CATALOG_HOST }}:8160",
+            "{{ LICENSE_MANAGER_HOST }}:8170",
+            "{{ ENTERPRISE_ACCESS_HOST }}:8270",
+            "{{ ENTERPRISE_SUBSIDY_HOST }}:8280",
+        ]
     else:
-        hosts += ["{{ ENTERPRISE_CATALOG_HOST }}", "{{ LICENSE_MANAGER_HOST }}"]
+        hosts += [
+            "{{ ENTERPRISE_CATALOG_HOST }}",
+            "{{ LICENSE_MANAGER_HOST }}",
+            "{{ ENTERPRISE_ACCESS_HOST }}",
+            "{{ ENTERPRISE_SUBSIDY_HOST }}",
+        ]
     return hosts
 
 
@@ -198,6 +269,26 @@ tutor_hooks.Filters.IMAGES_BUILD.add_items(
             "{{ LICENSE_MANAGER_DOCKER_IMAGE }}",
             (),
         ),
+        # Enterprise access images
+        (
+            "enterprise-access-worker",
+            ("plugins", "enterpriseaccess", "build", "enterpriseaccess"),
+            "{{ ENTERPRISE_ACCESS_WORKER_DOCKER_IMAGE }}",
+            ("--target=enterprise-access-worker-dev",),
+        ),
+        (
+            "enterprise-access",
+            ("plugins", "enterpriseaccess", "build", "enterpriseaccess"),
+            "{{ ENTERPRISE_ACCESS_DOCKER_IMAGE }}",
+            (),
+        ),
+        # Enterprise subsidy image
+        (
+            "enterprise-subsidy",
+            ("plugins", "enterprisesubsidy", "build", "enterprisesubsidy"),
+            "{{ ENTERPRISE_SUBSIDY_DOCKER_IMAGE }}",
+            (),
+        ),
     ]
 )
 tutor_hooks.Filters.IMAGES_PULL.add_items(
@@ -221,6 +312,18 @@ tutor_hooks.Filters.IMAGES_PULL.add_items(
         (
             "license-manager-bulk-enrollment-worker",
             "{{ LICENSE_MANAGER_BULK_ENROLLMENT_WORKER_DOCKER_IMAGE }}",
+        ),
+        (
+            "enterprise-access",
+            "{{ ENTERPRISE_ACCESS_DOCKER_IMAGE }}",
+        ),
+        (
+            "enterprise-access-worker",
+            "{{ ENTERPRISE_ACCESS_WORKER_DOCKER_IMAGE }}",
+        ),
+        (
+            "enterprise-subsidy",
+            "{{ ENTERPRISE_SUBSIDY_DOCKER_IMAGE }}",
         ),
     ]
 )
@@ -246,6 +349,18 @@ tutor_hooks.Filters.IMAGES_PUSH.add_items(
             "license-manager-bulk-enrollment-worker",
             "{{ LICENSE_MANAGER_BULK_ENROLLMENT_WORKER_DOCKER_IMAGE }}",
         ),
+        (
+            "enterprise-access",
+            "{{ ENTERPRISE_ACCESS_DOCKER_IMAGE }}",
+        ),
+        (
+            "enterprise-access-worker",
+            "{{ ENTERPRISE_ACCESS_WORKER_DOCKER_IMAGE }}",
+        ),
+        (
+            "enterprise-subsidy",
+            "{{ ENTERPRISE_SUBSIDY_DOCKER_IMAGE }}",
+        ),
     ]
 )
 
@@ -255,6 +370,13 @@ MFES = {
         "port": 8734,
         "version": "master",
     },
+    # npm install fails due to corrupted file dependency
+    # https://github.com/openedx/frontend-app-admin-portal/blob/7e36288a6a6a26d74ac96cf4b11b92d2238fc3e3/package.json#L49
+    # "admin-portal-enterprise": {
+    #     "repository": "https://github.com/openedx/frontend-app-admin-portal.git",
+    #     "port": 1991,
+    #     "version": "master",
+    # },
 }
 
 

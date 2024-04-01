@@ -14,3 +14,19 @@
 
     import proxy "license-manager:8000"
 }
+
+{{ ENTERPRISE_ACCESS_HOST }}{$default_site_port} {
+    request_body {
+        max_size 10MB
+    }
+
+    import proxy "enterprise-access:8000"
+}
+
+{{ ENTERPRISE_SUBSIDY_HOST }}{$default_site_port} {
+    request_body {
+        max_size 10MB
+    }
+
+    import proxy "enterprise-subsidy:8000"
+}

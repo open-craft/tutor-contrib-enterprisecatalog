@@ -2,6 +2,7 @@ SECRET_KEY = "{{ LICENSE_MANAGER_SECRET_KEY }}"
 ALLOWED_HOSTS = [
     "license-manager",
     "{{ LICENSE_MANAGER_HOST }}",
+    "{{ ENTERPRISE_ACCESS_HOST }}",
     "{{ LMS_HOST }}",
     "{{ ENTERPRISE_CATALOG_HOST }}"
 ]

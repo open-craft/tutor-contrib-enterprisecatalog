@@ -1,7 +1,6 @@
-# enterprise-catalog plugin for [Tutor](https://docs.tutor.overhang.io)
+# enterprise-catalog, license-manager, enterprise-access and enterprise-subsidy plugin for [Tutor](https://docs.tutor.overhang.io)
 
 ## Installation
-
 
 ```sh
 pip install git+https://github.com/open-craft/tutor-contrib-enterprisecatalog
@@ -12,6 +11,15 @@ pip install git+https://github.com/open-craft/tutor-contrib-enterprisecatalog
 ```sh
 # This plugin depends on discovery, ecommerce and mfe tutor plugins
 tutor plugins enable enterprise-catalog discovery ecommerce mfe
+# Build required images
+tutor images build enterprise-catalog enterprise-catalog-worker license-manager \
+license-manager-worker license-manager-bulk-enrollment-worker enterprise-access \
+enterprise-access-worker enterprise-subsidy mfe
+# Finally start tutor using
+# Development
+tutor dev launch
+# Production/local
+tutor local launch
 ```
 
 ## Configuration

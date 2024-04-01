@@ -3,3 +3,7 @@ MFE_CONFIG["DISCOVERY_API_BASE_URL"] = "{% if ENABLE_HTTPS %}https{% else %}http
 MFE_CONFIG["ECOMMERCE_BASE_URL"] = "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ECOMMERCE_HOST }}"
 MFE_CONFIG["LMS_BASE_URL"] = "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}"
 MFE_CONFIG["LICENSE_MANAGER_URL"] = "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LICENSE_MANAGER_HOST }}"
+MFE_CONFIG["LICENSE_MANAGER_BASE_URL"] = "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LICENSE_MANAGER_HOST }}"
+MFE_CONFIG["ENTERPRISE_ACCESS_BASE_URL"] = "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_ACCESS_HOST }}"
+MFE_CONFIG["ENTERPRISE_LEARNER_PORTAL_URL"] = "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ MFE_HOST }}/learner-portal-enterprise"
+MFE_CONFIG["ENTERPRISE_SUBSIDY_BASE_URL"] = "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_SUBSIDY_HOST }}"

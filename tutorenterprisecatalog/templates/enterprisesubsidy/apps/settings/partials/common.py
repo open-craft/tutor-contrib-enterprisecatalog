@@ -1,10 +1,10 @@
-SECRET_KEY = "{{ ENTERPRISE_CATALOG_SECRET_KEY }}"
+SECRET_KEY = "{{ ENTERPRISE_SUBSIDY_SECRET_KEY }}"
 ALLOWED_HOSTS = [
-    "enterprise-catalog",
-    "{{ ENTERPRISE_CATALOG_HOST }}",
-    "{{ ENTERPRISE_ACCESS_HOST }}",
-    "{{ LMS_HOST }}",
+    "enterprise-subsidy",
+    "{{ ENTERPRISE_SUBSIDY_HOST }}",
     "{{ LICENSE_MANAGER_HOST }}",
+    "{{ LMS_HOST }}",
+    "{{ ENTERPRISE_CATALOG_HOST }}"
 ]
 
 PLATFORM_NAME = "{{ PLATFORM_NAME }}"
@@ -12,9 +12,9 @@ PLATFORM_NAME = "{{ PLATFORM_NAME }}"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "{{ ENTERPRISE_CATALOG_MYSQL_DATABASE }}",
-        "USER": "{{ ENTERPRISE_CATALOG_MYSQL_USERNAME }}",
-        "PASSWORD": "{{ ENTERPRISE_CATALOG_MYSQL_PASSWORD }}",
+        "NAME": "{{ ENTERPRISE_SUBSIDY_MYSQL_DATABASE }}",
+        "USER": "{{ ENTERPRISE_SUBSIDY_MYSQL_USERNAME }}",
+        "PASSWORD": "{{ ENTERPRISE_SUBSIDY_MYSQL_PASSWORD }}",
         "HOST": "{{ MYSQL_HOST }}",
         "PORT": "{{ MYSQL_PORT }}",
         "OPTIONS": {
@@ -26,8 +26,8 @@ DATABASES = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "KEY_PREFIX": "enterprise-catalog",
-        "LOCATION": "redis://{% if REDIS_USERNAME and REDIS_PASSWORD %}{{ REDIS_USERNAME }}:{{ REDIS_PASSWORD }}{% endif %}@{{ REDIS_HOST }}:{{ REDIS_PORT }}/{{ ENTERPRISE_CATALOG_CACHE_REDIS_DB }}",
+        "KEY_PREFIX": "enterprise-subsidy",
+        "LOCATION": "redis://{% if REDIS_USERNAME and REDIS_PASSWORD %}{{ REDIS_USERNAME }}:{{ REDIS_PASSWORD }}{% endif %}@{{ REDIS_HOST }}:{{ REDIS_PORT }}/{{ ENTERPRISE_SUBSIDY_CACHE_REDIS_DB }}",
     }
 }
 
@@ -45,8 +45,6 @@ if "local" in LOGGING["handlers"]:
 for logger in LOGGING["loggers"].values():
     if "local" in logger["handlers"]:
         logger["handlers"].remove("local")
-# Decrease verbosity of algolia logger
-LOGGING["loggers"]["algoliasearch_django"] = {"level": "WARNING"}
 
 OAUTH_API_TIMEOUT = 5
 {% set jwt_rsa_key | rsa_import_key %}{{ JWT_RSA_PRIVATE_KEY }}{% endset %}
@@ -92,4 +90,4 @@ CELERY_BROKER_URL = "{}://{}:{}@{}/{}".format(
     CELERY_BROKER_VHOST
 )
 
-{{ patch("enterprise-catalog-common-settings") }}
+{{ patch("enterprise-subsidy-common-settings") }}

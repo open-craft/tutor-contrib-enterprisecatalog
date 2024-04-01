@@ -74,7 +74,8 @@ RUN {% if is_buildkit_enabled() %}--mount=type=cache,target=/openedx/.cache/pip,
 {{ patch("license-manager-dockerfile-post-python-requirements") }}
 
 # Collect static assets
-RUN make static
+COPY --chown=app:app assets.py ./license_manager/settings/assets.py
+RUN DJANGO_SETTINGS_MODULE=license_manager.settings.assets make static
 
 # Run production server
 ENV DJANGO_SETTINGS_MODULE license_manager.settings.tutor.production
