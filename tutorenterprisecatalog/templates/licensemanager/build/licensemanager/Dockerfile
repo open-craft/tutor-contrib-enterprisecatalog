@@ -53,14 +53,14 @@ FROM minimal AS license-manager-worker-dev
 
 {{ patch("license-manager-worker-dockerfile-post-python-requirements") }}
 
-ENV WORKER_CONFIGURATION_MODULE license_manager.settings.tutor.celery_production
+ENV DJANGO_SETTINGS_MODULE license_manager.settings.tutor.celery_production
 CMD celery --app=license_manager.celery:app worker -Q license_manager.default --loglevel=info
 
 FROM minimal AS license-manager-bulk-enrollment-worker-dev
 
 {{ patch("license-manager-bulk-enrollment-worker-dockerfile-post-python-requirements") }}
 
-ENV WORKER_CONFIGURATION_MODULE license_manager.settings.tutor.celery_production
+ENV DJANGO_SETTINGS_MODULE license_manager.settings.tutor.celery_production
 CMD celery --app=license_manager.celery:app worker -Q license_manager.bulk_enrollment --loglevel=info
 
 FROM minimal AS license-manager

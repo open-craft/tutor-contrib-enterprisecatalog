@@ -43,6 +43,8 @@ catalog_config = {
         "ALGOLIA_SEARCH_API_KEY": "",
         "ALGOLIA_INDEX_NAME": "",
         "ALGOLIA_INDEX_NAME_JOBS": "",
+        "DISCOVERY_API_URL": "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ DISCOVERY_HOST }}/api/v1/",
+        "DISCOVERY_USER": "discovery",
     },
     # Include information to be used by loop below
     "repo_name": "enterprise-catalog",

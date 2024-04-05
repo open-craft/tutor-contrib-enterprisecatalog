@@ -83,3 +83,11 @@
     enterprise_worker
 
 (./manage.py lms waffle_sample --list | grep use_enterprise_catalog) || ./manage.py lms waffle_sample --create use_enterprise_catalog 100
+
+## Create Catalog integration record.
+## This is required to make requests to Discovery service.
+## https://github.com/openedx/edx-platform/blob/104969c6592a5e100f051fe717cac6bc9960b65f/openedx/core/djangoapps/catalog/management/commands/create_catalog_integrations.py#L60-L60
+./manage.py lms create_catalog_integrations \
+    --internal_api_url {{ ENTERPRISE_CATALOG_DISCOVERY_API_URL }} \
+    --service_username {{ ENTERPRISE_CATALOG_DISCOVERY_USER }} \
+    --enabled

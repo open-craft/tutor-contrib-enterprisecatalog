@@ -53,7 +53,7 @@ FROM minimal AS enterprise-access-worker-dev
 
 {{ patch("enterprise-access-worker-dockerfile-post-python-requirements") }}
 
-ENV WORKER_CONFIGURATION_MODULE enterprise_access.settings.tutor.celery_production
+ENV DJANGO_SETTINGS_MODULE enterprise_access.settings.tutor.celery_production
 CMD celery --app=enterprise_access.celery:app worker -Q enterprise_access.default --loglevel=info
 
 FROM minimal AS enterprise-access
