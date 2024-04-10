@@ -1,9 +1,12 @@
 # Modify users created with an incorrect email and that might clash with the newly created users
+export LICENSE_MANAGER_WORKER_NAME={{ LICENSE_MANAGER_WORKER_NAME }}
+export LICENSE_MANAGER_WORKER_EMAIL={{ LICENSE_MANAGER_WORKER_EMAIL }}
 ./manage.py lms shell -c \
-    "from django.contrib.auth import get_user_model;\
-    get_user_model().objects.filter(username='license_manager_worker').exclude(email='license_manager_worker@openedx').update(email='license_manager_worker@openedx')"
+    "import os;\
+    from django.contrib.auth import get_user_model;\
+    get_user_model().objects.filter(username=os.environ['LICENSE_MANAGER_WORKER_NAME']).exclude(email=os.environ['LICENSE_MANAGER_WORKER_EMAIL']).update(email=os.environ['LICENSE_MANAGER_WORKER_EMAIL'])"
 
-./manage.py lms manage_user license_manager_worker license_manager_worker@openedx --staff --unusable-password
+./manage.py lms manage_user {{ LICENSE_MANAGER_WORKER_NAME }} {{ LICENSE_MANAGER_WORKER_EMAIL }} --staff --unusable-password
 
 # Development client
 ./manage.py lms create_dot_application \
@@ -15,7 +18,7 @@
     --skip-authorization \
     --update \
     license-manager-dev \
-    license_manager_worker
+    {{ LICENSE_MANAGER_WORKER_NAME }}
 ./manage.py lms create_dot_application \
     --grant-type authorization-code \
     --redirect-uris "http://{{ LICENSE_MANAGER_HOST }}:8170/complete/edx-oauth2/" \
@@ -25,7 +28,7 @@
     --skip-authorization \
     --update \
     license-manager-sso-dev \
-    license_manager_worker
+    {{ LICENSE_MANAGER_WORKER_NAME }}
 
 # Production client
 ./manage.py lms create_dot_application \
@@ -37,7 +40,7 @@
     --skip-authorization \
     --update \
     license-manager \
-    license_manager_worker
+    {{ LICENSE_MANAGER_WORKER_NAME }}
 ./manage.py lms create_dot_application \
     --grant-type authorization-code \
     --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LICENSE_MANAGER_HOST }}/complete/edx-oauth2/" \
@@ -47,4 +50,4 @@
     --skip-authorization \
     --update \
     license-manager-sso \
-    license_manager_worker
+    {{ LICENSE_MANAGER_WORKER_NAME }}

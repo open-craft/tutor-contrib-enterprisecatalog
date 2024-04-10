@@ -1,19 +1,26 @@
 # Modify users created with an incorrect email and that might clash with the newly created users
-./manage.py lms shell -c \
-    "from django.contrib.auth import get_user_model;\
-    get_user_model().objects.filter(username='enterprise_worker').exclude(email='enterprise_worker@openedx').update(email='enterprise_worker@openedx')"
-./manage.py lms shell -c \
-    "from django.contrib.auth import get_user_model;\
-    get_user_model().objects.filter(username='enterprise_catalog_worker').exclude(email='enterprise_catalog_worker@openedx').update(email='enterprise_catalog_worker@openedx')"
+export ENTERPRISE_CATALOG_WORKER_NAME={{ ENTERPRISE_CATALOG_WORKER_NAME }}
+export ENTERPRISE_CATALOG_WORKER_EMAIL={{ ENTERPRISE_CATALOG_WORKER_EMAIL }}
 
-./manage.py lms manage_user enterprise_catalog_worker enterprise_catalog_worker@openedx --staff --unusable-password
+export ENTERPRISE_CATALOG_ENTERPRISE_WORKER_NAME={{ ENTERPRISE_CATALOG_ENTERPRISE_WORKER_NAME }}
+export ENTERPRISE_CATALOG_ENTERPRISE_WORKER_EMAIL={{ ENTERPRISE_CATALOG_ENTERPRISE_WORKER_EMAIL }}
+./manage.py lms shell -c \
+    "import os;\
+    from django.contrib.auth import get_user_model;\
+    get_user_model().objects.filter(username=os.environ['ENTERPRISE_CATALOG_ENTERPRISE_WORKER_NAME']).exclude(email=os.environ['ENTERPRISE_CATALOG_ENTERPRISE_WORKER_EMAIL']).update(email=os.environ['ENTERPRISE_CATALOG_ENTERPRISE_WORKER_EMAIL'])"
+./manage.py lms shell -c \
+    "import os;\
+    from django.contrib.auth import get_user_model;\
+    get_user_model().objects.filter(username=os.environ['ENTERPRISE_CATALOG_WORKER_NAME']).exclude(email=os.environ['ENTERPRISE_CATALOG_WORKER_EMAIL']).update(email=os.environ['ENTERPRISE_CATALOG_WORKER_EMAIL'])"
+
+./manage.py lms manage_user {{ ENTERPRISE_CATALOG_WORKER_NAME }} {{ ENTERPRISE_CATALOG_WORKER_EMAIL }} --staff --unusable-password
 
 # Enterprise backend user and permissions
-./manage.py lms manage_user enterprise_worker enterprise_worker@openedx --staff --superuser --unusable-password
+./manage.py lms manage_user {{ ENTERPRISE_CATALOG_ENTERPRISE_WORKER_NAME }} {{ ENTERPRISE_CATALOG_ENTERPRISE_WORKER_EMAIL }} --staff --superuser --unusable-password
 ./manage.py lms shell -c \
     "from django.contrib.auth import get_user_model;\
     from django.contrib.auth.models import Permission;\
-    enterprise_worker = get_user_model().objects.get(username='enterprise_worker');\
+    enterprise_worker = get_user_model().objects.get(username=os.environ['ENTERPRISE_CATALOG_ENTERPRISE_WORKER_NAME']);\
     enterprise_model_permissions = list(Permission.objects.filter(content_type__app_label='enterprise'));\
     enterprise_worker.user_permissions.add(*enterprise_model_permissions);\
     enterprise_worker.save()"
@@ -28,7 +35,7 @@
     --skip-authorization \
     --update \
     enterprise-catalog-dev \
-    enterprise_catalog_worker
+    {{ ENTERPRISE_CATALOG_WORKER_NAME }}
 ./manage.py lms create_dot_application \
     --grant-type authorization-code \
     --redirect-uris "http://{{ ENTERPRISE_CATALOG_HOST }}:8160/complete/edx-oauth2/" \
@@ -38,7 +45,7 @@
     --skip-authorization \
     --update \
     enterprise-catalog-sso-dev \
-    enterprise_catalog_worker
+    {{ ENTERPRISE_CATALOG_WORKER_NAME }}
 # For edx-enterprise to use lms as backend
 ./manage.py lms create_dot_application \
     --grant-type client-credentials \
@@ -48,7 +55,7 @@
     --skip-authorization \
     --update \
     enterprise-backend-dev \
-    enterprise_worker
+    {{ ENTERPRISE_CATALOG_ENTERPRISE_WORKER_NAME }}
 
 # Production client
 ./manage.py lms create_dot_application \
@@ -60,7 +67,7 @@
     --skip-authorization \
     --update \
     enterprise-catalog \
-    enterprise_catalog_worker
+    {{ ENTERPRISE_CATALOG_WORKER_NAME }}
 ./manage.py lms create_dot_application \
     --grant-type authorization-code \
     --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_CATALOG_HOST }}/complete/edx-oauth2/" \
@@ -70,7 +77,7 @@
     --skip-authorization \
     --update \
     enterprise-catalog-sso \
-    enterprise_catalog_worker
+    {{ ENTERPRISE_CATALOG_WORKER_NAME }}
 # For edx-enterprise to use lms as backend
 ./manage.py lms create_dot_application \
     --grant-type client-credentials \
@@ -80,7 +87,7 @@
     --skip-authorization \
     --update \
     enterprise-backend \
-    enterprise_worker
+    {{ ENTERPRISE_CATALOG_ENTERPRISE_WORKER_NAME }}
 
 (./manage.py lms waffle_sample --list | grep use_enterprise_catalog) || ./manage.py lms waffle_sample --create use_enterprise_catalog 100
 

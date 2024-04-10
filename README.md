@@ -10,11 +10,9 @@ pip install git+https://github.com/open-craft/tutor-contrib-enterprisecatalog
 
 ```sh
 # This plugin depends on discovery, ecommerce and mfe tutor plugins
-tutor plugins enable enterprise-catalog discovery ecommerce mfe
+tutor plugins enable discovery ecommerce mfe enterprise-catalog
 # Build required images
-tutor images build enterprise-catalog enterprise-catalog-worker license-manager \
-license-manager-worker license-manager-bulk-enrollment-worker enterprise-access \
-enterprise-access-worker enterprise-subsidy mfe
+tutor images build enterprise-catalog enterprise-catalog-worker license-manager license-manager-worker license-manager-bulk-enrollment-worker enterprise-access
 # Finally start tutor using
 # Development
 tutor dev launch

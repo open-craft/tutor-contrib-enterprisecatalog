@@ -39,17 +39,28 @@ catalog_config = {
         "CACHE_REDIS_DB": "{{ OPENEDX_CACHE_REDIS_DB }}",
         "REPOSITORY": "https://github.com/openedx/enterprise-catalog.git",
         "REPOSITORY_VERSION": "{{ OPENEDX_COMMON_VERSION }}",
+        "DISCOVERY_API_URL": "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ DISCOVERY_HOST }}/api/v1/",
+        "DISCOVERY_USER": "discovery",
+        "WORKER_NAME": "enterprise_catalog_worker",
+        "WORKER_EMAIL": "enterprise_catalog_worker@openedx",
+        "DISCOVERY_WORKER_NAME": "discovery_worker",
+        "DISCOVERY_WORKER_EMAIL": "discovery_worker@openedx",
+        "ECOMMERCE_WORKER_NAME": "ecommerce_worker",
+        "ECOMMERCE_WORKER_EMAIL": "ecommerce_worker@openedx",
+        "ENTERPRISE_WORKER_NAME": "enterprise_worker",
+        "ENTERPRISE_WORKER_EMAIL": "enterprise_worker@openedx",
+    },
+    # Unprefixed variables
+    "raw": {
         "ALGOLIA_APP_ID": "",
         "ALGOLIA_SEARCH_API_KEY": "",
         "ALGOLIA_INDEX_NAME": "",
         "ALGOLIA_INDEX_NAME_JOBS": "",
-        "DISCOVERY_API_URL": "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ DISCOVERY_HOST }}/api/v1/",
-        "DISCOVERY_USER": "discovery",
     },
     # Include information to be used by loop below
     "repo_name": "enterprise-catalog",
     "app_name": "enterprise-catalog",
-    "init_tasks": ("mysql", "lms", "enterprise-catalog"),
+    "init_tasks": ("mysql", "lms", "enterprise-catalog", "discovery", "ecommerce"),
     "templates_dir": "enterprisecatalog",
 }
 
@@ -76,11 +87,13 @@ license_manager_config = {
         "CACHE_REDIS_DB": "{{ OPENEDX_CACHE_REDIS_DB }}",
         "REPOSITORY": "https://github.com/openedx/license-manager.git",
         "REPOSITORY_VERSION": "{{ OPENEDX_COMMON_VERSION }}",
+        "WORKER_NAME": "license_manager_worker",
+        "WORKER_EMAIL": "license_manager_worker@openedx",
     },
     # Include information to be used by loop below
     "repo_name": "license-manager",
     "app_name": "license-manager",
-    "init_tasks": ("mysql", "lms", "license-manager"),
+    "init_tasks": ("mysql", "lms", "license-manager", "enterprise-catalog"),
     "templates_dir": "licensemanager",
 }
 
@@ -106,11 +119,13 @@ access_config = {
         "CACHE_REDIS_DB": "{{ OPENEDX_CACHE_REDIS_DB }}",
         "REPOSITORY": "https://github.com/openedx/enterprise-access.git",
         "REPOSITORY_VERSION": "{{ OPENEDX_COMMON_VERSION }}",
+        "WORKER_NAME": "enterprise_access_worker",
+        "WORKER_EMAIL": "enterprise_access_worker@openedx",
     },
     # Include information to be used by loop below
     "repo_name": "enterprise-access",
     "app_name": "enterprise-access",
-    "init_tasks": ("mysql", "lms", "enterprise-access"),
+    "init_tasks": ("mysql", "lms", "enterprise-access", "discovery", "enterprise-subsidy"),
     "templates_dir": "enterpriseaccess",
 }
 
@@ -135,6 +150,8 @@ subsidy_config = {
         "CACHE_REDIS_DB": "{{ OPENEDX_CACHE_REDIS_DB }}",
         "REPOSITORY": "https://github.com/openedx/enterprise-subsidy.git",
         "REPOSITORY_VERSION": "main",
+        "WORKER_NAME": "enterprise_subsidy_worker",
+        "WORKER_EMAIL": "enterprise_subsidy_worker@openedx",
     },
     # Include information to be used by loop below
     "repo_name": "enterprise-subsidy",
@@ -148,15 +165,22 @@ tutor_hooks.Filters.ENV_TEMPLATE_ROOTS.add_item(
     pkg_resources.resource_filename("tutorenterprisecatalog", "templates")
 )
 
+# Warning: Do not change below order
 configurations = [
-    ("ENTERPRISE_CATALOG_", catalog_config),
-    ("LICENSE_MANAGER_", license_manager_config),
-    ("ENTERPRISE_ACCESS_", access_config),
-    ("ENTERPRISE_SUBSIDY_", subsidy_config),
+    ('ENTERPRISE_CATALOG_', catalog_config),
+    ('LICENSE_MANAGER_', license_manager_config),
+    # Subsidy needs to be initialized before access as a task in access folder depends on subsidy database being initialized
+    ('ENTERPRISE_SUBSIDY_', subsidy_config),
+    ('ENTERPRISE_ACCESS_', access_config),
 ]
 
 for prefix, config in configurations:
     # Add configuration entries
+    # Unprefixed raw config variables
+    tutor_hooks.Filters.CONFIG_DEFAULTS.add_items(
+        [(f"{key}", value) for key, value in config.get("raw", {}).items()]
+    )
+    # Prefixed config variables
     tutor_hooks.Filters.CONFIG_DEFAULTS.add_items(
         [(f"{prefix}{key}", value) for key, value in config.get("defaults", {}).items()]
     )

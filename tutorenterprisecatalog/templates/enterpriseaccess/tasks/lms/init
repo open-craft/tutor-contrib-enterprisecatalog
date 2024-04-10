@@ -1,16 +1,19 @@
 # Modify users created with an incorrect email and that might clash with the newly created users
+export ENTERPRISE_ACCESS_WORKER_NAME={{ ENTERPRISE_ACCESS_WORKER_NAME }}
+export ENTERPRISE_ACCESS_WORKER_EMAIL={{ ENTERPRISE_ACCESS_WORKER_EMAIL }}
 ./manage.py lms shell -c \
-    "from django.contrib.auth import get_user_model;\
-    get_user_model().objects.filter(username='enterprise_access_worker').exclude(email='enterprise_access_worker@openedx').update(email='enterprise_access_worker@openedx')"
+    "import os;\
+    from django.contrib.auth import get_user_model;\
+    get_user_model().objects.filter(username=os.environ['ENTERPRISE_ACCESS_WORKER_NAME']).exclude(email=os.environ['ENTERPRISE_ACCESS_WORKER_EMAIL']).update(email=os.environ['ENTERPRISE_ACCESS_WORKER_EMAIL'])"
 
-./manage.py lms manage_user enterprise_access_worker enterprise_access_worker@openedx --superuser --staff --unusable-password
+./manage.py lms manage_user {{ ENTERPRISE_ACCESS_WORKER_NAME }} {{ ENTERPRISE_ACCESS_WORKER_EMAIL }} --superuser --staff --unusable-password
 
 # Create system wide enterprise role assignment
 ./manage.py lms shell -c \
 "from django.contrib.auth import get_user_model;\
 from enterprise.models import SystemWideEnterpriseUserRoleAssignment, SystemWideEnterpriseRole;\
 User = get_user_model();\
-worker_user = User.objects.get(username=\"enterprise_access_worker\");\
+worker_user = User.objects.get(username=os.environ['ENTERPRISE_ACCESS_WORKER_NAME']);\
 operator_role = SystemWideEnterpriseRole.objects.get(name=\"enterprise_openedx_operator\");\
 assignment = SystemWideEnterpriseUserRoleAssignment.objects.get_or_create(user=worker_user, role=operator_role, applies_to_all_contexts=True)"
 
@@ -24,7 +27,7 @@ assignment = SystemWideEnterpriseUserRoleAssignment.objects.get_or_create(user=w
     --skip-authorization \
     --update \
     enterprise-access-dev \
-    enterprise_access_worker
+    {{ ENTERPRISE_ACCESS_WORKER_NAME }}
 ./manage.py lms create_dot_application \
     --grant-type authorization-code \
     --redirect-uris "http://{{ ENTERPRISE_ACCESS_HOST }}:8270/complete/edx-oauth2/" \
@@ -34,7 +37,7 @@ assignment = SystemWideEnterpriseUserRoleAssignment.objects.get_or_create(user=w
     --skip-authorization \
     --update \
     enterprise-access-sso-dev \
-    enterprise_access_worker
+    {{ ENTERPRISE_ACCESS_WORKER_NAME }}
 
 # Production client
 ./manage.py lms create_dot_application \
@@ -46,7 +49,7 @@ assignment = SystemWideEnterpriseUserRoleAssignment.objects.get_or_create(user=w
     --skip-authorization \
     --update \
     enterprise-access \
-    enterprise_access_worker
+    {{ ENTERPRISE_ACCESS_WORKER_NAME }}
 ./manage.py lms create_dot_application \
     --grant-type authorization-code \
     --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_ACCESS_HOST }}/complete/edx-oauth2/" \
@@ -56,4 +59,4 @@ assignment = SystemWideEnterpriseUserRoleAssignment.objects.get_or_create(user=w
     --skip-authorization \
     --update \
     enterprise-access-sso \
-    enterprise_access_worker
+    {{ ENTERPRISE_ACCESS_WORKER_NAME }}
