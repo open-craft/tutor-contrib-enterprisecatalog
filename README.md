@@ -27,7 +27,7 @@ The `tutor-ecommerce` plugin deploys two MFEs, i.e., [frontend-app-ecommerce](ht
 ```log
 enterprise-catalog-1  | django.db.utils.OperationalError: (1045, "Access denied for user 'enterprisecatalog'@'172.18.0.21' (using password: YES)")
 ```
-If you see above error while running `tutor dev launch`, try again and it should work. We don't the root cause of this issue yet.
+If you see above error while running `tutor dev launch`, try again and it should work. We don't know the root cause of this issue yet.
 
 ## Configuration
 
