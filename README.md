@@ -12,13 +12,22 @@ pip install git+https://github.com/open-craft/tutor-contrib-enterprisecatalog
 # This plugin depends on discovery, ecommerce and mfe tutor plugins
 tutor plugins enable discovery ecommerce mfe enterprise-catalog
 # Build required images
-tutor images build enterprise-catalog enterprise-catalog-worker license-manager license-manager-worker license-manager-bulk-enrollment-worker enterprise-access
+tutor images build enterprise-catalog enterprise-catalog-worker license-manager license-manager-worker license-manager-bulk-enrollment-worker enterprise-access enterprise-access-worker enterprise-subsidy mfe
 # Finally start tutor using
 # Development
 tutor dev launch
 # Production/local
 tutor local launch
 ```
+
+## Troubleshooting
+
+The `tutor-ecommerce` plugin deploys two MFEs, i.e., [frontend-app-ecommerce](https://github.com/openedx/frontend-app-ecommerce.git) & [frontend-app-payment](https://github.com/openedx/frontend-app-payment.git) and the git URL used in the palm version points to `edx` organisation which should be replaced with `openedx`. If you face this error while building images, please replace the `edx` organisation slug with `openedx` as shown [here](https://github.com/overhangio/tutor-ecommerce/commit/0a619ca3701244bd367741aa6459d2cded14a09d).
+
+```log
+enterprise-catalog-1  | django.db.utils.OperationalError: (1045, "Access denied for user 'enterprisecatalog'@'172.18.0.21' (using password: YES)")
+```
+If you see above error while running `tutor dev launch`, try again and it should work. We don't the root cause of this issue yet.
 
 ## Configuration
 
