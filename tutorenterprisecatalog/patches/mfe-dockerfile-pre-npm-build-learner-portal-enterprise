@@ -1,0 +1,1 @@
+ENV LMS_BASE_URL='{% if LMS_BASE_URL is defined %}{{ LMS_BASE_URL }}{% else %}{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}{% endif %}'

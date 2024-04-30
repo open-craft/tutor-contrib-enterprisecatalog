@@ -6,7 +6,7 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 
 
 def load_readme():
-    with io.open(os.path.join(HERE, "README.rst"), "rt", encoding="utf8") as f:
+    with io.open(os.path.join(HERE, "README.md"), "rt", encoding="utf8") as f:
         return f.read()
 
 
@@ -34,15 +34,16 @@ setup(
     },
     license="AGPLv3",
     author="Sofiane Bebert",
-    description="enterprisecatalog plugin for Tutor",
+    description="enterprise-catalog plugin for Tutor",
     long_description=load_readme(),
     packages=find_packages(exclude=["tests*"]),
     include_package_data=True,
-    python_requires=">=3.5",
-    install_requires=["tutor"],
+    install_requires=["tutor>=16.0.0,<17.0.0"],
+    extras_require={"dev": "tutor[dev]>=16.0.0,<17.0.0"},
+    python_requires=">=3.8",
     entry_points={
-        "tutor.plugin.v0": [
-            "enterprisecatalog = tutorenterprisecatalog.plugin"
+        "tutor.plugin.v1": [
+            "enterprise-catalog = tutorenterprisecatalog.plugin"
         ]
     },
     classifiers=[
@@ -51,11 +52,8 @@ setup(
         "License :: OSI Approved :: GNU Affero General Public License v3",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
 )

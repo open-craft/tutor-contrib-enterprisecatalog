@@ -1,0 +1,53 @@
+# Modify users created with an incorrect email and that might clash with the newly created users
+export LICENSE_MANAGER_WORKER_NAME={{ LICENSE_MANAGER_WORKER_NAME }}
+export LICENSE_MANAGER_WORKER_EMAIL={{ LICENSE_MANAGER_WORKER_EMAIL }}
+./manage.py lms shell -c \
+    "import os;\
+    from django.contrib.auth import get_user_model;\
+    get_user_model().objects.filter(username=os.environ['LICENSE_MANAGER_WORKER_NAME']).exclude(email=os.environ['LICENSE_MANAGER_WORKER_EMAIL']).update(email=os.environ['LICENSE_MANAGER_WORKER_EMAIL'])"
+
+./manage.py lms manage_user {{ LICENSE_MANAGER_WORKER_NAME }} {{ LICENSE_MANAGER_WORKER_EMAIL }} --staff --unusable-password
+
+# Development client
+./manage.py lms create_dot_application \
+    --grant-type client-credentials \
+    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LICENSE_MANAGER_HOST }}:8170/complete/edx-oauth2/" \
+    --client-id {{ LICENSE_MANAGER_OAUTH2_KEY_DEV }} \
+    --client-secret {{ LICENSE_MANAGER_OAUTH2_SECRET }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    license-manager-dev \
+    {{ LICENSE_MANAGER_WORKER_NAME }}
+./manage.py lms create_dot_application \
+    --grant-type authorization-code \
+    --redirect-uris "http://{{ LICENSE_MANAGER_HOST }}:8170/complete/edx-oauth2/" \
+    --client-id {{ LICENSE_MANAGER_OAUTH2_KEY_SSO_DEV }} \
+    --client-secret {{ LICENSE_MANAGER_OAUTH2_SECRET_SSO }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    license-manager-sso-dev \
+    {{ LICENSE_MANAGER_WORKER_NAME }}
+
+# Production client
+./manage.py lms create_dot_application \
+    --grant-type client-credentials \
+    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LICENSE_MANAGER_HOST }}/complete/edx-oauth2/" \
+    --client-id {{ LICENSE_MANAGER_OAUTH2_KEY }} \
+    --client-secret {{ LICENSE_MANAGER_OAUTH2_SECRET }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    license-manager \
+    {{ LICENSE_MANAGER_WORKER_NAME }}
+./manage.py lms create_dot_application \
+    --grant-type authorization-code \
+    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LICENSE_MANAGER_HOST }}/complete/edx-oauth2/" \
+    --client-id {{ LICENSE_MANAGER_OAUTH2_KEY_SSO }} \
+    --client-secret {{ LICENSE_MANAGER_OAUTH2_SECRET_SSO }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    license-manager-sso \
+    {{ LICENSE_MANAGER_WORKER_NAME }}

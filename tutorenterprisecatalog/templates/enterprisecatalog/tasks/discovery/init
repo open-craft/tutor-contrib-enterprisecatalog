@@ -1,0 +1,35 @@
+# Create discovery, ecommerce and catalog workers in discovery service.
+export ENTERPRISE_CATALOG_DISCOVERY_WORKER_NAME={{ ENTERPRISE_CATALOG_DISCOVERY_WORKER_NAME }}
+export ENTERPRISE_CATALOG_DISCOVERY_WORKER_EMAIL={{ ENTERPRISE_CATALOG_DISCOVERY_WORKER_EMAIL }}
+export ENTERPRISE_CATALOG_ECOMMERCE_WORKER_NAME={{ ENTERPRISE_CATALOG_ECOMMERCE_WORKER_NAME }}
+export ENTERPRISE_CATALOG_ECOMMERCE_WORKER_EMAIL={{ ENTERPRISE_CATALOG_ECOMMERCE_WORKER_EMAIL }}
+export ENTERPRISE_CATALOG_WORKER_NAME={{ ENTERPRISE_CATALOG_WORKER_NAME }}
+export ENTERPRISE_CATALOG_WORKER_EMAIL={{ ENTERPRISE_CATALOG_WORKER_EMAIL }}
+
+./manage.py shell -c "
+import os
+from django.contrib.auth import get_user_model
+get_user_model().objects.filter(username=os.environ['ENTERPRISE_CATALOG_DISCOVERY_WORKER_NAME']).exclude(email=os.environ['ENTERPRISE_CATALOG_DISCOVERY_WORKER_EMAIL']).update(email=os.environ['ENTERPRISE_CATALOG_DISCOVERY_WORKER_EMAIL'])
+user, created = get_user_model().objects.get_or_create(username=os.environ['ENTERPRISE_CATALOG_DISCOVERY_WORKER_NAME'], email=os.environ['ENTERPRISE_CATALOG_DISCOVERY_WORKER_EMAIL'])
+if created:
+    user.set_unusable_password()
+    user.is_staff = True
+    user.is_superuser = False
+    user.save()
+
+get_user_model().objects.filter(username=os.environ['ENTERPRISE_CATALOG_ECOMMERCE_WORKER_NAME']).exclude(email=os.environ['ENTERPRISE_CATALOG_ECOMMERCE_WORKER_EMAIL']).update(email=os.environ['ENTERPRISE_CATALOG_ECOMMERCE_WORKER_EMAIL'])
+user, created = get_user_model().objects.get_or_create(username=os.environ['ENTERPRISE_CATALOG_ECOMMERCE_WORKER_NAME'], email=os.environ['ENTERPRISE_CATALOG_ECOMMERCE_WORKER_EMAIL'])
+if created:
+    user.set_unusable_password()
+    user.is_staff = True
+    user.is_superuser = False
+    user.save()
+
+get_user_model().objects.filter(username=os.environ['ENTERPRISE_CATALOG_WORKER_NAME']).exclude(email=os.environ['ENTERPRISE_CATALOG_WORKER_EMAIL']).update(email=os.environ['ENTERPRISE_CATALOG_WORKER_EMAIL'])
+user, created = get_user_model().objects.get_or_create(username=os.environ['ENTERPRISE_CATALOG_WORKER_NAME'], email=os.environ['ENTERPRISE_CATALOG_WORKER_EMAIL'])
+if created:
+    user.set_unusable_password()
+    user.is_staff = True
+    user.is_superuser = False
+    user.save()
+"

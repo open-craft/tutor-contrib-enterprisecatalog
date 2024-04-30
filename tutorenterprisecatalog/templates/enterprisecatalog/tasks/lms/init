@@ -1,0 +1,100 @@
+# Modify users created with an incorrect email and that might clash with the newly created users
+export ENTERPRISE_CATALOG_WORKER_NAME={{ ENTERPRISE_CATALOG_WORKER_NAME }}
+export ENTERPRISE_CATALOG_WORKER_EMAIL={{ ENTERPRISE_CATALOG_WORKER_EMAIL }}
+
+export ENTERPRISE_CATALOG_ENTERPRISE_WORKER_NAME={{ ENTERPRISE_CATALOG_ENTERPRISE_WORKER_NAME }}
+export ENTERPRISE_CATALOG_ENTERPRISE_WORKER_EMAIL={{ ENTERPRISE_CATALOG_ENTERPRISE_WORKER_EMAIL }}
+./manage.py lms shell -c \
+    "import os;\
+    from django.contrib.auth import get_user_model;\
+    get_user_model().objects.filter(username=os.environ['ENTERPRISE_CATALOG_ENTERPRISE_WORKER_NAME']).exclude(email=os.environ['ENTERPRISE_CATALOG_ENTERPRISE_WORKER_EMAIL']).update(email=os.environ['ENTERPRISE_CATALOG_ENTERPRISE_WORKER_EMAIL'])"
+./manage.py lms shell -c \
+    "import os;\
+    from django.contrib.auth import get_user_model;\
+    get_user_model().objects.filter(username=os.environ['ENTERPRISE_CATALOG_WORKER_NAME']).exclude(email=os.environ['ENTERPRISE_CATALOG_WORKER_EMAIL']).update(email=os.environ['ENTERPRISE_CATALOG_WORKER_EMAIL'])"
+
+./manage.py lms manage_user {{ ENTERPRISE_CATALOG_WORKER_NAME }} {{ ENTERPRISE_CATALOG_WORKER_EMAIL }} --staff --unusable-password
+
+# Enterprise backend user and permissions
+./manage.py lms manage_user {{ ENTERPRISE_CATALOG_ENTERPRISE_WORKER_NAME }} {{ ENTERPRISE_CATALOG_ENTERPRISE_WORKER_EMAIL }} --staff --superuser --unusable-password
+./manage.py lms shell -c \
+    "from django.contrib.auth import get_user_model;\
+    from django.contrib.auth.models import Permission;\
+    enterprise_worker = get_user_model().objects.get(username=os.environ['ENTERPRISE_CATALOG_ENTERPRISE_WORKER_NAME']);\
+    enterprise_model_permissions = list(Permission.objects.filter(content_type__app_label='enterprise'));\
+    enterprise_worker.user_permissions.add(*enterprise_model_permissions);\
+    enterprise_worker.save()"
+
+# Development client
+./manage.py lms create_dot_application \
+    --grant-type client-credentials \
+    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_CATALOG_HOST }}:8160/complete/edx-oauth2/" \
+    --client-id {{ ENTERPRISE_CATALOG_OAUTH2_KEY_DEV }} \
+    --client-secret {{ ENTERPRISE_CATALOG_OAUTH2_SECRET }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    enterprise-catalog-dev \
+    {{ ENTERPRISE_CATALOG_WORKER_NAME }}
+./manage.py lms create_dot_application \
+    --grant-type authorization-code \
+    --redirect-uris "http://{{ ENTERPRISE_CATALOG_HOST }}:8160/complete/edx-oauth2/" \
+    --client-id {{ ENTERPRISE_CATALOG_OAUTH2_KEY_SSO_DEV }} \
+    --client-secret {{ ENTERPRISE_CATALOG_OAUTH2_SECRET_SSO }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    enterprise-catalog-sso-dev \
+    {{ ENTERPRISE_CATALOG_WORKER_NAME }}
+# For edx-enterprise to use lms as backend
+./manage.py lms create_dot_application \
+    --grant-type client-credentials \
+    --client-id {{ ENTERPRISE_CATALOG_BACKEND_OAUTH2_KEY_DEV }} \
+    --client-secret {{ ENTERPRISE_CATALOG_BACKEND_OAUTH2_SECRET }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    enterprise-backend-dev \
+    {{ ENTERPRISE_CATALOG_ENTERPRISE_WORKER_NAME }}
+
+# Production client
+./manage.py lms create_dot_application \
+    --grant-type client-credentials \
+    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_CATALOG_HOST }}/complete/edx-oauth2/" \
+    --client-id {{ ENTERPRISE_CATALOG_OAUTH2_KEY }} \
+    --client-secret {{ ENTERPRISE_CATALOG_OAUTH2_SECRET }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    enterprise-catalog \
+    {{ ENTERPRISE_CATALOG_WORKER_NAME }}
+./manage.py lms create_dot_application \
+    --grant-type authorization-code \
+    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_CATALOG_HOST }}/complete/edx-oauth2/" \
+    --client-id {{ ENTERPRISE_CATALOG_OAUTH2_KEY_SSO }} \
+    --client-secret {{ ENTERPRISE_CATALOG_OAUTH2_SECRET_SSO }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    enterprise-catalog-sso \
+    {{ ENTERPRISE_CATALOG_WORKER_NAME }}
+# For edx-enterprise to use lms as backend
+./manage.py lms create_dot_application \
+    --grant-type client-credentials \
+    --client-id {{ ENTERPRISE_CATALOG_BACKEND_OAUTH2_KEY }} \
+    --client-secret {{ ENTERPRISE_CATALOG_BACKEND_OAUTH2_SECRET }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    enterprise-backend \
+    {{ ENTERPRISE_CATALOG_ENTERPRISE_WORKER_NAME }}
+
+(./manage.py lms waffle_sample --list | grep use_enterprise_catalog) || ./manage.py lms waffle_sample --create use_enterprise_catalog 100
+
+## Create Catalog integration record.
+## This is required to make requests to Discovery service.
+## https://github.com/openedx/edx-platform/blob/104969c6592a5e100f051fe717cac6bc9960b65f/openedx/core/djangoapps/catalog/management/commands/create_catalog_integrations.py#L60-L60
+./manage.py lms create_catalog_integrations \
+    --internal_api_url {{ ENTERPRISE_CATALOG_DISCOVERY_API_URL }} \
+    --service_username {{ ENTERPRISE_CATALOG_DISCOVERY_USER }} \
+    --enabled

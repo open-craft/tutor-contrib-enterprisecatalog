@@ -1,0 +1,62 @@
+# Modify users created with an incorrect email and that might clash with the newly created users
+export ENTERPRISE_ACCESS_WORKER_NAME={{ ENTERPRISE_ACCESS_WORKER_NAME }}
+export ENTERPRISE_ACCESS_WORKER_EMAIL={{ ENTERPRISE_ACCESS_WORKER_EMAIL }}
+./manage.py lms shell -c \
+    "import os;\
+    from django.contrib.auth import get_user_model;\
+    get_user_model().objects.filter(username=os.environ['ENTERPRISE_ACCESS_WORKER_NAME']).exclude(email=os.environ['ENTERPRISE_ACCESS_WORKER_EMAIL']).update(email=os.environ['ENTERPRISE_ACCESS_WORKER_EMAIL'])"
+
+./manage.py lms manage_user {{ ENTERPRISE_ACCESS_WORKER_NAME }} {{ ENTERPRISE_ACCESS_WORKER_EMAIL }} --superuser --staff --unusable-password
+
+# Create system wide enterprise role assignment
+./manage.py lms shell -c \
+"from django.contrib.auth import get_user_model;\
+from enterprise.models import SystemWideEnterpriseUserRoleAssignment, SystemWideEnterpriseRole;\
+User = get_user_model();\
+worker_user = User.objects.get(username=os.environ['ENTERPRISE_ACCESS_WORKER_NAME']);\
+operator_role = SystemWideEnterpriseRole.objects.get(name=\"enterprise_openedx_operator\");\
+assignment = SystemWideEnterpriseUserRoleAssignment.objects.get_or_create(user=worker_user, role=operator_role, applies_to_all_contexts=True)"
+
+# Development client
+./manage.py lms create_dot_application \
+    --grant-type client-credentials \
+    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_ACCESS_HOST }}:8270/complete/edx-oauth2/" \
+    --client-id {{ ENTERPRISE_ACCESS_OAUTH2_KEY_DEV }} \
+    --client-secret {{ ENTERPRISE_ACCESS_OAUTH2_SECRET }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    enterprise-access-dev \
+    {{ ENTERPRISE_ACCESS_WORKER_NAME }}
+./manage.py lms create_dot_application \
+    --grant-type authorization-code \
+    --redirect-uris "http://{{ ENTERPRISE_ACCESS_HOST }}:8270/complete/edx-oauth2/" \
+    --client-id {{ ENTERPRISE_ACCESS_OAUTH2_KEY_SSO_DEV }} \
+    --client-secret {{ ENTERPRISE_ACCESS_OAUTH2_SECRET_SSO }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    enterprise-access-sso-dev \
+    {{ ENTERPRISE_ACCESS_WORKER_NAME }}
+
+# Production client
+./manage.py lms create_dot_application \
+    --grant-type client-credentials \
+    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_ACCESS_HOST }}/complete/edx-oauth2/" \
+    --client-id {{ ENTERPRISE_ACCESS_OAUTH2_KEY }} \
+    --client-secret {{ ENTERPRISE_ACCESS_OAUTH2_SECRET }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    enterprise-access \
+    {{ ENTERPRISE_ACCESS_WORKER_NAME }}
+./manage.py lms create_dot_application \
+    --grant-type authorization-code \
+    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_ACCESS_HOST }}/complete/edx-oauth2/" \
+    --client-id {{ ENTERPRISE_ACCESS_OAUTH2_KEY_SSO }} \
+    --client-secret {{ ENTERPRISE_ACCESS_OAUTH2_SECRET_SSO }} \
+    --scopes user_id \
+    --skip-authorization \
+    --update \
+    enterprise-access-sso \
+    {{ ENTERPRISE_ACCESS_WORKER_NAME }}

@@ -1,4 +1,4 @@
-enterprisecatalog:
+enterprise-catalog:
   environment:
     DJANGO_SETTINGS_MODULE: enterprise_catalog.settings.tutor.development
   command: python3 manage.py runserver 0.0.0.0:8160
@@ -7,11 +7,65 @@ enterprisecatalog:
   networks:
     default:
       aliases:
-        - "{{ ENTERPRISECATALOG_HOST }}"
+        - "{{ ENTERPRISE_CATALOG_HOST }}"
 
-enterprisecatalog-worker:
+enterprise-catalog-worker:
   environment:
     DJANGO_SETTINGS_MODULE: enterprise_catalog.settings.tutor.celery_development
   ports:
     - "8161:8161"
-  command: celery -A enterprise_catalog worker -l DEBUG
+  command: celery --app=enterprise_catalog.celery:app worker -l DEBUG
+
+license-manager:
+  environment:
+    DJANGO_SETTINGS_MODULE: license_manager.settings.tutor.development
+  command: python3 manage.py runserver 0.0.0.0:8170
+  ports:
+    - "8170:8170"
+  networks:
+    default:
+      aliases:
+        - "{{ LICENSE_MANAGER_HOST }}"
+
+license-manager-worker:
+  environment:
+    DJANGO_SETTINGS_MODULE: license_manager.settings.tutor.celery_development
+  ports:
+    - "8171:8171"
+  command: celery --app=license_manager.celery:app worker -Q license_manager.default -l DEBUG
+
+license-manager-bulk-enrollment-worker:
+  environment:
+    DJANGO_SETTINGS_MODULE: license_manager.settings.tutor.celery_development
+  ports:
+    - "8172:8172"
+  command: celery --app=license_manager.celery:app worker -Q license_manager.bulk_enrollment -l DEBUG
+
+enterprise-access:
+  environment:
+    DJANGO_SETTINGS_MODULE: enterprise_access.settings.tutor.development
+  command: python3 manage.py runserver 0.0.0.0:8270
+  ports:
+    - "8270:8270"
+  networks:
+    default:
+      aliases:
+        - "{{ ENTERPRISE_ACCESS_HOST }}"
+
+enterprise-access-worker:
+  environment:
+    DJANGO_SETTINGS_MODULE: enterprise_access.settings.tutor.celery_development
+  ports:
+    - "8271:8271"
+  command: celery --app=enterprise_access.celery:app worker -l DEBUG
+
+enterprise-subsidy:
+  environment:
+    DJANGO_SETTINGS_MODULE: enterprise_subsidy.settings.tutor.development
+  command: python3 manage.py runserver 0.0.0.0:8280
+  ports:
+    - "8280:8280"
+  networks:
+    default:
+      aliases:
+        - "{{ ENTERPRISE_SUBSIDY_HOST }}"

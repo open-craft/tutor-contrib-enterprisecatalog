@@ -1,7 +1,58 @@
-enterprisecatalog-job:
-  image: {{ ENTERPRISECATALOG_DOCKER_IMAGE }}
+enterprise-catalog-job:
+  image: {{ ENTERPRISE_CATALOG_DOCKER_IMAGE }}
   environment:
     DJANGO_SETTINGS_MODULE: enterprise_catalog.settings.tutor.production
   volumes:
     - ../plugins/enterprisecatalog/apps/settings/tutor:/openedx/enterprise-catalog/enterprise_catalog/settings/tutor:ro
-  depends_on: {{ [("lms", RUN_LMS), ("mysql", RUN_MYSQL)]|list_if }}
+    {%- for mount in iter_mounts(MOUNTS, "enterprise-catalog") %}
+    - {{ mount }}
+    {%- endfor %}
+  depends_on:
+    - discovery
+    - lms
+    - license-manager
+    {% if RUN_MYSQL %}- mysql{% endif %}
+
+license-manager-job:
+  image: {{ LICENSE_MANAGER_DOCKER_IMAGE }}
+  environment:
+    DJANGO_SETTINGS_MODULE: license_manager.settings.tutor.production
+  volumes:
+    - ../plugins/licensemanager/apps/settings/tutor:/openedx/license-manager/license_manager/settings/tutor:ro
+    {%- for mount in iter_mounts(MOUNTS, "license-manager") %}
+    - {{ mount }}
+    {%- endfor %}
+  depends_on:
+    - discovery
+    - lms
+    {% if RUN_MYSQL %}- mysql{% endif %}
+
+enterprise-access-job:
+  image: {{ ENTERPRISE_ACCESS_DOCKER_IMAGE }}
+  environment:
+    DJANGO_SETTINGS_MODULE: enterprise_access.settings.tutor.production
+  volumes:
+    - ../plugins/enterpriseaccess/apps/settings/tutor:/openedx/enterprise-access/enterprise_access/settings/tutor:ro
+    {%- for mount in iter_mounts(MOUNTS, "enterprise-access") %}
+    - {{ mount }}
+    {%- endfor %}
+  depends_on:
+    - discovery
+    - lms
+    - license-manager
+    - enterprise-catalog
+    {% if RUN_MYSQL %}- mysql{% endif %}
+
+enterprise-subsidy-job:
+  image: {{ ENTERPRISE_SUBSIDY_DOCKER_IMAGE }}
+  environment:
+    DJANGO_SETTINGS_MODULE: enterprise_subsidy.settings.tutor.production
+  volumes:
+    - ../plugins/enterprisesubsidy/apps/settings/tutor:/openedx/enterprise-subsidy/enterprise_subsidy/settings/tutor:ro
+    {%- for mount in iter_mounts(MOUNTS, "enterprise-subsidy") %}
+    - {{ mount }}
+    {%- endfor %}
+  depends_on:
+    - lms
+    - enterprise-catalog
+    {% if RUN_MYSQL %}- mysql{% endif %}
