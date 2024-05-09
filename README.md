@@ -8,6 +8,11 @@ pip install git+https://github.com/open-craft/tutor-contrib-enterprisecatalog
 
 ## Usage
 
+Set below variable in `config.yml` if running tutor-nightly as [enterprise-access](https://github.com/openedx/enterprise-access) does not have a `master` branch.
+```yaml
+ENTERPRISE_ACCESS_REPOSITORY_VERSION: main
+```
+
 ```sh
 # This plugin depends on discovery, ecommerce and mfe tutor plugins
 tutor plugins enable discovery ecommerce mfe enterprise-catalog

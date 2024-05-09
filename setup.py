@@ -38,8 +38,8 @@ setup(
     long_description=load_readme(),
     packages=find_packages(exclude=["tests*"]),
     include_package_data=True,
-    install_requires=["tutor>=16.0.0,<17.0.0"],
-    extras_require={"dev": "tutor[dev]>=16.0.0,<17.0.0"},
+    install_requires=["tutor>=17.0.0,<18.0.0"],
+    extras_require={"dev": "tutor[dev]>=17.0.0,<18.0.0"},
     python_requires=">=3.8",
     entry_points={
         "tutor.plugin.v1": [
@@ -55,5 +55,6 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
 )

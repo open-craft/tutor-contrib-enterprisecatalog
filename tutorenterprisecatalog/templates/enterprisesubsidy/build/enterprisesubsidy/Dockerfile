@@ -1,10 +1,10 @@
-{% if is_buildkit_enabled() %}# syntax=docker/dockerfile:1.4{% endif %}
+# syntax=docker/dockerfile:1.4
 ###### Minimal image with base system requirements for most stages
 FROM docker.io/ubuntu:20.04 as minimal
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN {% if is_buildkit_enabled() %}--mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked{% endif %} \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt update && \
     apt install -y curl git-core language-pack-en python3 python3-pip python3-venv \
     build-essential libcairo2 libffi-dev libmysqlclient-dev libxml2-dev libxslt-dev libjpeg-dev libssl-dev \
@@ -31,7 +31,7 @@ ENV ENTERPRISE_SUBSIDY_CFG /openedx/config.yml
 RUN python3 -m venv ../venv/
 ENV PATH="/openedx/venv/bin:$PATH"
 
-RUN {% if is_buildkit_enabled() %}--mount=type=cache,target=/openedx/.cache/pip,sharing=shared {% endif %}pip install \
+RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install \
     # https://pypi.org/project/setuptools/
     # https://pypi.org/project/pip/
     # https://pypi.org/project/wheel/
@@ -41,19 +41,19 @@ RUN {% if is_buildkit_enabled() %}--mount=type=cache,target=/openedx/.cache/pip,
 # This is identical to "make production-requirements" but it was split in multiple
 # instructions to benefit from docker image caching
 # Install base requirements
-RUN {% if is_buildkit_enabled() %}--mount=type=cache,target=/openedx/.cache/pip,sharing=shared {% endif %}pip install -r requirements.txt
-{% for extra_requirement in ENTERPRISE_SUBSIDY_EXTRA_PIP_REQUIREMENTS %}RUN {% if is_buildkit_enabled() %}--mount=type=cache,target=/openedx/.cache/pip,sharing=shared {% endif %}pip install '{{ extra_requirement }}'
+RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install -r requirements.txt
+{% for extra_requirement in ENTERPRISE_SUBSIDY_EXTRA_PIP_REQUIREMENTS %}RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install '{{ extra_requirement }}'
 {% endfor %}
 
 # Install extra requirements
-RUN {% if is_buildkit_enabled() %}--mount=type=cache,target=/openedx/.cache/pip,sharing=shared {% endif %}pip install \
+RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install \
     # Use redis as a django cache https://pypi.org/project/django-redis/
     django-redis==5.2.0
 
 FROM minimal AS enterprise-subsidy
 
 # Install uwsgi
-RUN {% if is_buildkit_enabled() %}--mount=type=cache,target=/openedx/.cache/pip,sharing=shared {% endif %}pip install \
+RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install \
     # uwsgi server https://pypi.org/project/uWSGI/
     uwsgi==2.0.21
 
