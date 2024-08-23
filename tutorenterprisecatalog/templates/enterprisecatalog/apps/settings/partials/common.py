@@ -92,4 +92,10 @@ CELERY_BROKER_URL = "{}://{}:{}@{}/{}".format(
     CELERY_BROKER_VHOST
 )
 
+ALGOLIA = {
+    "INDEX_NAME": "{{ ALGOLIA_INDEX_NAME }}",
+    "APPLICATION_ID": "{{ ALGOLIA_APP_ID }}",
+    "API_KEY": "{{ ALGOLIA_ADMIN_API_KEY }}"
+}
+
 {{ patch("enterprise-catalog-common-settings") }}

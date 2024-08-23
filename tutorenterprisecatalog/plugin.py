@@ -56,6 +56,7 @@ catalog_config = {
         "ALGOLIA_SEARCH_API_KEY": "",
         "ALGOLIA_INDEX_NAME": "",
         "ALGOLIA_INDEX_NAME_JOBS": "",
+        "ALGOLIA_ADMIN_API_KEY": "",
     },
     # Include information to be used by loop below
     "repo_name": "enterprise-catalog",
@@ -125,7 +126,13 @@ access_config = {
     # Include information to be used by loop below
     "repo_name": "enterprise-access",
     "app_name": "enterprise-access",
-    "init_tasks": ("mysql", "lms", "enterprise-access", "discovery", "enterprise-subsidy"),
+    "init_tasks": (
+        "mysql",
+        "lms",
+        "enterprise-access",
+        "discovery",
+        "enterprise-subsidy",
+    ),
     "templates_dir": "enterpriseaccess",
 }
 
@@ -167,11 +174,11 @@ tutor_hooks.Filters.ENV_TEMPLATE_ROOTS.add_item(
 
 # Warning: Do not change below order
 configurations = [
-    ('ENTERPRISE_CATALOG_', catalog_config),
-    ('LICENSE_MANAGER_', license_manager_config),
+    ("ENTERPRISE_CATALOG_", catalog_config),
+    ("LICENSE_MANAGER_", license_manager_config),
     # Subsidy needs to be initialized before access as a task in access folder depends on subsidy database being initialized
-    ('ENTERPRISE_SUBSIDY_', subsidy_config),
-    ('ENTERPRISE_ACCESS_', access_config),
+    ("ENTERPRISE_SUBSIDY_", subsidy_config),
+    ("ENTERPRISE_ACCESS_", access_config),
 ]
 
 for prefix, config in configurations:
@@ -187,7 +194,9 @@ for prefix, config in configurations:
     tutor_hooks.Filters.CONFIG_UNIQUE.add_items(
         [(f"{prefix}{key}", value) for key, value in config.get("unique", {}).items()]
     )
-    tutor_hooks.Filters.CONFIG_OVERRIDES.add_items(list(config.get("overrides", {}).items()))
+    tutor_hooks.Filters.CONFIG_OVERRIDES.add_items(
+        list(config.get("overrides", {}).items())
+    )
 
     # Render the "build" and "apps" folders
     tutor_hooks.Filters.ENV_TEMPLATE_TARGETS.add_items(
@@ -219,7 +228,9 @@ for prefix, config in configurations:
 
 # Automount /openedx/enterprise-catalog folder from the container
 @tutor_hooks.Filters.COMPOSE_MOUNTS.add()
-def _mount_repositories(mounts: list[tuple[str, str]], name: str) -> list[tuple[str, str]]:
+def _mount_repositories(
+    mounts: list[tuple[str, str]], name: str
+) -> list[tuple[str, str]]:
     repos = {config["repo_name"]: config["app_name"] for _, config in configurations}
     if name in repos:
         mounts.append((repos[name], f"/openedx/{name}"))
@@ -392,9 +403,9 @@ tutor_hooks.Filters.IMAGES_PUSH.add_items(
 
 MFES = {
     "learner-portal-enterprise": {
-        "repository": "https://github.com/openedx/frontend-app-learner-portal-enterprise.git",
+        "repository": "https://github.com/open-craft/frontend-app-learner-portal-enterprise.git",
         "port": 8734,
-        "version": "master",
+        "version": "tecoholic/BB-8825-custom-ui",
     },
     # npm install fails due to corrupted file dependency
     # https://github.com/openedx/frontend-app-admin-portal/blob/7e36288a6a6a26d74ac96cf4b11b92d2238fc3e3/package.json#L49
@@ -407,13 +418,17 @@ MFES = {
 
 
 @MFE_APPS.add()
-def _add_enterprise_catalog_mfe_apps(apps: dict[str, MFE_ATTRS_TYPE]) -> dict[str, MFE_ATTRS_TYPE]:
+def _add_enterprise_catalog_mfe_apps(
+    apps: dict[str, MFE_ATTRS_TYPE],
+) -> dict[str, MFE_ATTRS_TYPE]:
     apps.update(MFES)
     return apps
 
 
 for mfe_name in MFES:
-    tag = "{{ DOCKER_REGISTRY }}open-craft/openedx-" + mfe_name + "-dev:{{ MFE_VERSION }}"
+    tag = (
+        "{{ DOCKER_REGISTRY }}open-craft/openedx-" + mfe_name + "-dev:{{ MFE_VERSION }}"
+    )
     tutor_hooks.Filters.IMAGES_BUILD.add_item(
         (
             f"{mfe_name}-dev",
@@ -434,4 +449,6 @@ for path in glob(
     )
 ):
     with open(path, encoding="utf-8") as patch_file:
-        tutor_hooks.Filters.ENV_PATCHES.add_item((os.path.basename(path), patch_file.read()))
+        tutor_hooks.Filters.ENV_PATCHES.add_item(
+            (os.path.basename(path), patch_file.read())
+        )
