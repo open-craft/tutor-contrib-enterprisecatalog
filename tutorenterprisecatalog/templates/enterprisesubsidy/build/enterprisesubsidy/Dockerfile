@@ -1,13 +1,13 @@
 # syntax=docker/dockerfile:1.4
 ###### Minimal image with base system requirements for most stages
-FROM docker.io/ubuntu:20.04 as minimal
+FROM docker.io/python:3.12-bullseye as minimal
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt update && \
-    apt install -y curl git-core language-pack-en python3 python3-pip python3-venv \
-    build-essential libcairo2 libffi-dev libmysqlclient-dev libxml2-dev libxslt-dev libjpeg-dev libssl-dev \
+    apt install -y curl git-core python3 python3-pip python3-venv python3-dev \
+    build-essential libcairo2 libffi-dev libmariadb-dev libxml2-dev libxslt-dev libjpeg-dev libssl-dev \
     pkg-config
 ENV LC_ALL en_US.UTF-8
 
@@ -35,7 +35,7 @@ RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install \
     # https://pypi.org/project/setuptools/
     # https://pypi.org/project/pip/
     # https://pypi.org/project/wheel/
-    setuptools==67.7.2 pip==23.1.2. wheel==0.40.0
+    setuptools pip wheel
 
 # Install python requirements
 # This is identical to "make production-requirements" but it was split in multiple
@@ -55,7 +55,7 @@ FROM minimal AS enterprise-subsidy
 # Install uwsgi
 RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install \
     # uwsgi server https://pypi.org/project/uWSGI/
-    uwsgi==2.0.21
+    uwsgi
 
 
 {{ patch("enterprise-subsidy-dockerfile-post-python-requirements") }}
