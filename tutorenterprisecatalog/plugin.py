@@ -1,6 +1,5 @@
 from glob import glob
 import os
-import pkg_resources
 import typing as t
 
 from tutor import hooks as tutor_hooks
@@ -169,7 +168,7 @@ subsidy_config = {
 
 # Add the "templates" folder as a template root
 tutor_hooks.Filters.ENV_TEMPLATE_ROOTS.add_item(
-    pkg_resources.resource_filename("tutorenterprisecatalog", "templates")
+    os.path.join(HERE, "templates"),
 )
 
 # Warning: Do not change below order
@@ -210,7 +209,8 @@ for prefix, config in configurations:
     for service in config["init_tasks"]:
         with open(
             os.path.join(
-                pkg_resources.resource_filename("tutorenterprisecatalog", "templates"),
+                HERE,
+                "templates",
                 config["templates_dir"],
                 "tasks",
                 service,
@@ -442,12 +442,7 @@ for mfe_name in MFES:
 
 
 # Load patches from files
-for path in glob(
-    os.path.join(
-        pkg_resources.resource_filename("tutorenterprisecatalog", "patches"),
-        "*",
-    )
-):
+for path in glob(os.path.join(HERE, "patches", "*")):
     with open(path, encoding="utf-8") as patch_file:
         tutor_hooks.Filters.ENV_PATCHES.add_item(
             (os.path.basename(path), patch_file.read())

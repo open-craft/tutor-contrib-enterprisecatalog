@@ -38,8 +38,8 @@ setup(
     long_description=load_readme(),
     packages=find_packages(exclude=["tests*"]),
     include_package_data=True,
-    install_requires=["tutor>=17.0.0,<19.0.0"],
-    extras_require={"dev": "tutor[dev]>=17.0.0,<19.0.0"},
+    install_requires=["tutor>=20.0.0,<22.0.0"],
+    extras_require={"dev": "tutor[dev]>=20.0.0,<22.0.0"},
     python_requires=">=3.8",
     entry_points={
         "tutor.plugin.v1": ["enterprise-catalog = tutorenterprisecatalog.plugin"]
