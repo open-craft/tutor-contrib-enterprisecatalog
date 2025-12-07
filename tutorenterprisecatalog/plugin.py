@@ -118,7 +118,7 @@ access_config = {
         "OAUTH2_KEY_SSO_DEV": "enterprise-access-sso-dev",
         "CACHE_REDIS_DB": "{{ OPENEDX_CACHE_REDIS_DB }}",
         "REPOSITORY": "https://github.com/openedx/enterprise-access.git",
-        "REPOSITORY_VERSION": "{{ OPENEDX_COMMON_VERSION }}",
+        "REPOSITORY_VERSION": "main",
         "WORKER_NAME": "enterprise_access_worker",
         "WORKER_EMAIL": "enterprise_access_worker@openedx",
     },
