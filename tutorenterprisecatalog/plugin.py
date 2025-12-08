@@ -402,18 +402,17 @@ tutor_hooks.Filters.IMAGES_PUSH.add_items(
 )
 
 MFES = {
-    # "learner-portal-enterprise": {
-    #     "repository": "https://github.com/open-craft/frontend-app-learner-portal-enterprise.git",
-    #     "port": 8734,
-    #     "version": "tecoholic/BB-8825-custom-ui",
-    # },
-    # npm install fails due to corrupted file dependency
-    # https://github.com/openedx/frontend-app-admin-portal/blob/7e36288a6a6a26d74ac96cf4b11b92d2238fc3e3/package.json#L49
-    # "admin-portal-enterprise": {
-    #     "repository": "https://github.com/openedx/frontend-app-admin-portal.git",
-    #     "port": 1991,
-    #     "version": "master",
-    # },
+    "learner-portal-enterprise": {
+        "repository": "https://github.com/open-craft/frontend-app-learner-portal-enterprise.git",
+        "port": 8734,
+        "version": "tecoholic/BB-8825-custom-ui",
+    },
+    # NOTE: The custom branch fixes an issue with pulling translations during image build.
+    "admin-portal-enterprise": {
+        "repository": "https://github.com/open-craft/frontend-app-admin-portal.git",
+        "port": 1991,
+        "version": "tecoholic/BB-10168-fix-make-pull-translations",
+    },
 }
 
 
