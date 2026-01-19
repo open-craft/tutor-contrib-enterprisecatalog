@@ -156,6 +156,7 @@ subsidy_config = {
         "CACHE_REDIS_DB": "{{ OPENEDX_CACHE_REDIS_DB }}",
         "REPOSITORY": "https://github.com/openedx/enterprise-subsidy.git",
         "REPOSITORY_VERSION": "main",
+        "REPOSITORY_COMMIT": "",
         "WORKER_NAME": "enterprise_subsidy_worker",
         "WORKER_EMAIL": "enterprise_subsidy_worker@openedx",
     },

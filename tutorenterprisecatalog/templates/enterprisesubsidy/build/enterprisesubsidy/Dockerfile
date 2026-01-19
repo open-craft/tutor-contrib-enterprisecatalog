@@ -30,8 +30,12 @@ USER ${APP_USER_ID}
 ARG ENTERPRISE_SUBSIDY_REPOSITORY='{{ ENTERPRISE_SUBSIDY_REPOSITORY }}'
 ARG ENTERPRISE_SUBSIDY_VERSION='{{ ENTERPRISE_SUBSIDY_REPOSITORY_VERSION }}'
 RUN mkdir -p /openedx/enterprise-subsidy && \
-    git clone $ENTERPRISE_SUBSIDY_REPOSITORY --branch $ENTERPRISE_SUBSIDY_VERSION --depth 1 /openedx/enterprise-subsidy
+    git clone $ENTERPRISE_SUBSIDY_REPOSITORY --branch $ENTERPRISE_SUBSIDY_VERSION /openedx/enterprise-subsidy
 WORKDIR /openedx/enterprise-subsidy
+
+{%- if ENTERPRISE_SUBSIDY_REPOSITORY_COMMIT %}
+RUN git checkout {{ ENTERPRISE_SUBSIDY_REPOSITORY_COMMIT }}
+{% endif %}
 
 # Setup empty yml config file, which is required by production settings
 RUN echo "{}" > /openedx/config.yml

@@ -25,6 +25,10 @@ tutor dev launch
 tutor local launch
 ```
 
+## Notes
+
+* *Enterprise Subsidy* doesn't have release branches. So, the plugin clones from the `main` branch by defaults. For reproducible builds, set the `ENTERPRISE_SUBSIDY_REPOSITORY_COMMIT` to a commit hash.
+
 ## Troubleshooting
 
 The `tutor-ecommerce` plugin deploys two MFEs, i.e., [frontend-app-ecommerce](https://github.com/openedx/frontend-app-ecommerce.git) & [frontend-app-payment](https://github.com/openedx/frontend-app-payment.git) and the git URL used in the palm version points to `edx` organisation which should be replaced with `openedx`. If you face this error while building images, please replace the `edx` organisation slug with `openedx` as shown [here](https://github.com/overhangio/tutor-ecommerce/commit/0a619ca3701244bd367741aa6459d2cded14a09d).
