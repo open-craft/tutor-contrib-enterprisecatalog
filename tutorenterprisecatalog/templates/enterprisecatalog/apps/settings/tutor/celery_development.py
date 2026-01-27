@@ -24,10 +24,9 @@ LICENSE_MANAGER_BASE_URL = "http://{{ LICENSE_MANAGER_HOST }}:8170"
 
 # Logging: get rid of local handler
 logging_config = get_logger_config(
-    log_dir="/var/log",
-    edx_filename="enterprise_catalog_worker.log",
-    dev_env=True,
-    debug=False,
+    logging_env="development",
+    debug=True,
+    service_variant="catalog-worker",
 )
 if "local" in logging_config["handlers"]:
     logging_config["handlers"].pop("local")

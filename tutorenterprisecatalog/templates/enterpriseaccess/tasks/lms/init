@@ -17,6 +17,15 @@ worker_user = User.objects.get(username=os.environ['ENTERPRISE_ACCESS_WORKER_NAM
 operator_role = SystemWideEnterpriseRole.objects.get(name=\"enterprise_openedx_operator\");\
 assignment = SystemWideEnterpriseUserRoleAssignment.objects.get_or_create(user=worker_user, role=operator_role, applies_to_all_contexts=True)"
 
+./manage.py lms shell -c \
+"from django.contrib.auth import get_user_model;\
+from enterprise.models import SystemWideEnterpriseUserRoleAssignment, SystemWideEnterpriseRole;\
+User = get_user_model();\
+worker_user = User.objects.get(username=os.environ['ENTERPRISE_ACCESS_WORKER_NAME']);\
+operator_role = SystemWideEnterpriseRole.objects.get(name=\"enterprise_catalog_admin\");\
+assignment = SystemWideEnterpriseUserRoleAssignment.objects.get_or_create(user=worker_user, role=operator_role, applies_to_all_contexts=True)"
+
+
 # Development client
 ./manage.py lms create_dot_application \
     --grant-type client-credentials \

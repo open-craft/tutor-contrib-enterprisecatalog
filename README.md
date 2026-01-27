@@ -45,7 +45,8 @@ Below configuration variables are required for this plugin to function.
 ```yaml
 ALGOLIA_APP_ID: **********
 ALGOLIA_INDEX_NAME: enterprise-catalog
-ALGOLIA_INDEX_NAME_JOBS: ****
+ALGOLIA_REPLICA_INDEX_NAME: enterprise-catalog-alternate
+ALGOLIA_INDEX_NAME_JOBS: ''
 ALGOLIA_SEARCH_API_KEY: ********************************
 ```
 

@@ -1,6 +1,9 @@
 from glob import glob
+import enum
 import os
 import typing as t
+
+import click
 
 from tutor import hooks as tutor_hooks
 from tutor.__about__ import __version_suffix__
@@ -55,6 +58,7 @@ catalog_config = {
         "ALGOLIA_SEARCH_API_KEY": "",
         "ALGOLIA_INDEX_NAME": "",
         "ALGOLIA_INDEX_NAME_JOBS": "",
+        "ALGOLIA_REPLICA_INDEX_NAME": "",
         "ALGOLIA_ADMIN_API_KEY": "",
     },
     # Include information to be used by loop below
@@ -447,3 +451,24 @@ for path in glob(os.path.join(HERE, "patches", "*")):
         tutor_hooks.Filters.ENV_PATCHES.add_item(
             (os.path.basename(path), patch_file.read())
         )
+
+
+
+@click.command()
+@click.argument("service", type=click.Choice([
+    "enterprise-catalog",
+    "enterprise-subsidy",
+    "enterprise-access",
+    "license-manager",
+], case_sensitive=False))
+@click.argument("email")
+def enterprise_make_staff(service: str, email: str) -> t.Iterator[tuple[str, str]]:
+    """Make a user staff and superuser by email on the specificed enterprise service."""
+    command = f"""./manage.py shell -c \
+"from django.contrib.auth import get_user_model; \
+get_user_model().objects.filter(email='{email}').update(is_staff=True, is_superuser=True)"
+"""
+    yield (service, command)
+
+
+tutor_hooks.Filters.CLI_DO_COMMANDS.add_item(enterprise_make_staff)
