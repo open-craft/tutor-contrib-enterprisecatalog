@@ -25,7 +25,7 @@ ENTERPRISE_ACCESS_URL = "http://{{ ENTERPRISE_ACCESS_HOST }}:8270"
 
 CORS_ORIGIN_WHITELIST = list(CORS_ORIGIN_WHITELIST)
 {% for app_name, app in iter_mfes() %}
-{% if app_name in ["learner-portal-enterprise", "admin-portal-enterprise"] %}
+{% if app_name in ["enterprise", "admin-enterprise"] %}
 CORS_ORIGIN_WHITELIST.append("http://{{ MFE_HOST }}:{{ app['port'] }}")
 CSRF_TRUSTED_ORIGINS.append("http://{{ MFE_HOST }}:{{ app['port'] }}")
 {% endif %}

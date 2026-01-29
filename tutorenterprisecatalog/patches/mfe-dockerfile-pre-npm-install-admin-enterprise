@@ -1,0 +1,1 @@
+COPY --from=admin-enterprise-src /packages /openedx/app/packages
