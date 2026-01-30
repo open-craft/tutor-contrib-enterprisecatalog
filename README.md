@@ -58,6 +58,27 @@ LMS_BASE_URL: http://local.overhang.io:8000
 
 Then rebuild mfe tutor image using `tutor images build mfe` and launch tutor in dev mode using `tutor dev launch`. This is workaround is required until the utility function called [getProxyLoginUrl](https://github.com/openedx/frontend-enterprise/blob/83e8405e8768c8ea5d87dd40164d8266cb4ee7f0/packages/logistration/src/utils.js#L20) from `frontend-app-logistration` component reads `LMS_BASE_URL` from env instead of making use of mfe_config.
 
+## Developing MFE's using Tutor
+
+> [!NOTE]
+> There are 2 MFEs added by this plugin - frontend-app-learner-portal-enterprise, frontend-app-admin-portal.
+> They are mapped to the app names `enterprise` and `admin-enterprise` respectively. Replace `<mfe-app>` with
+> either of those 2 values in the instructions below.
+
+1. Clone the MFE repo, checkout to your branch and run `npm ci` to have dependencies installed.
+2. Add a Tutor mount to the repo in the format `tutor mounts add <mfe-app>:/local/path/frontend-app:/openedx/app`. E.g.,
+    ```sh
+    tutor mounts add enterprise:/home/user/repos/frontend-app-learner-portal-enterprise:/openedx/app
+    ```
+3. Update Tutor config `tutor config save`
+4. Build the images `tutor images build mfe <mfe-app>-dev`.
+5. Restart the services
+    ```
+    tutor dev stop mfe
+    tutor dev start mfe <mfe-app>
+    ```
+6. Logs can be monitored using `tutor dev logs <mfe-app>`.
+
 ## License
 
 This software is licensed under the terms of the AGPLv3.
