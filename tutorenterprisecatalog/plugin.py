@@ -408,14 +408,15 @@ tutor_hooks.Filters.IMAGES_PUSH.add_items(
 
 MFES = {
     "enterprise": {
-        "repository": "https://github.com/open-craft/frontend-app-learner-portal-enterprise.git",
+        "repository": "https://github.com/openedx/frontend-app-learner-portal-enterprise.git",
         "port": 8734,
-        "version": "tecoholic/BB-8825-custom-ui",
+        "version": "master",
     },
-    # NOTE: The custom branch fixes an issue with pulling translations during image build.
     "admin-enterprise": {
         "repository": "https://github.com/open-craft/frontend-app-admin-portal.git",
         "port": 1991,
+        # NOTE: The custom branch fixes an issue with pulling translations during image build.
+        # OPEN PR: https://github.com/openedx/frontend-app-admin-portal/pull/1734
         "version": "tecoholic/BB-10168-fix-make-pull-translations",
     },
 }
