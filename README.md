@@ -8,11 +8,6 @@ pip install git+https://github.com/open-craft/tutor-contrib-enterprisecatalog
 
 ## Usage
 
-Set below variable in `config.yml` if running tutor-nightly as [enterprise-access](https://github.com/openedx/enterprise-access) does not have a `master` branch.
-```yaml
-ENTERPRISE_ACCESS_REPOSITORY_VERSION: main
-```
-
 ```sh
 # This plugin depends on discovery, ecommerce and mfe tutor plugins
 tutor plugins enable discovery ecommerce mfe enterprise-catalog
@@ -24,19 +19,6 @@ tutor dev launch
 # Production/local
 tutor local launch
 ```
-
-## Notes
-
-* *Enterprise Subsidy* doesn't have release branches. So, the plugin clones from the `main` branch by defaults. For reproducible builds, set the `ENTERPRISE_SUBSIDY_REPOSITORY_COMMIT` to a commit hash.
-
-## Troubleshooting
-
-The `tutor-ecommerce` plugin deploys two MFEs, i.e., [frontend-app-ecommerce](https://github.com/openedx/frontend-app-ecommerce.git) & [frontend-app-payment](https://github.com/openedx/frontend-app-payment.git) and the git URL used in the palm version points to `edx` organisation which should be replaced with `openedx`. If you face this error while building images, please replace the `edx` organisation slug with `openedx` as shown [here](https://github.com/overhangio/tutor-ecommerce/commit/0a619ca3701244bd367741aa6459d2cded14a09d).
-
-```log
-enterprise-catalog-1  | django.db.utils.OperationalError: (1045, "Access denied for user 'enterprisecatalog'@'172.18.0.21' (using password: YES)")
-```
-If you see above error while running `tutor dev launch`, try again and it should work. We don't know the root cause of this issue yet.
 
 ## Configuration
 
@@ -50,13 +32,35 @@ ALGOLIA_INDEX_NAME_JOBS: ''
 ALGOLIA_SEARCH_API_KEY: ********************************
 ```
 
-While using tutor in development mode, please add LMS_BASE_URL variable with appropriate host and port, for example:
+### Enterprise Subsidy
 
-```bash
-LMS_BASE_URL: http://local.overhang.io:8000
+ *Enterprise Subsidy* doesn't have release branches. So, the plugin clones from the `main` branch by defaults. For reproducible builds, set the `ENTERPRISE_SUBSIDY_REPOSITORY_COMMIT` to a commit hash.
+
+### Enterprise MFEs
+
+This plugin adds 2 MFEs to the stack:
+* [frontend-app-learner-portal-enterprise](https://github.com/openedx/frontend-app-learner-portal-enterprise)
+* [frontend-app-admin-portal](https://github.com/openedx/frontend-app-admin-portal)
+
+They differ from the other MFEs supported by *tutor-mfe* in 2 aspects:
+
+1. The do not support the `frontend-plugin-framework`.
+2. They do not support [runtime configuration](https://docs.openedx.org/projects/edx-platform/en/latest/references/docs/lms/djangoapps/mfe_config_api/docs/decisions/0001-mfe-config-api.html) for some aspects of their functionality.
+
+To compensate for these differences the plugin exposes the following values that can be set in `config.yml` of your instance:
+
+* `ENTERPRISE_LEARNER_PORTAL_BUILD_ENV`, `ENTERPRISE_ADMIN_PORTAL_BUILD_ENV` - these can be set to `dev` or `prod` and default to `prod`. So, if you are running the services locally using `tutor dev`, make sure to set these in your `config.yml` file to `dev`.
+* `ENTERPRISE_LEARNER_PORTAL_BUILD_ENV_EXTRAS`, `ENTERPRISE_ADMIN_PORTAL_BUILD_ENV_EXTRAS` - these take a dict of values that are typically found in the `.env` files of these MFEs. These must be used to set things like `FEATURE_*` flags.
+
+Set these values in your `config.yml` file, run `tutor config save` and then rebuild mfe tutor image using `tutor images build mfe` for changes to be included in the MFE build. 
+
+#### Example
+
+```yaml
+ENTERPRISE_LEARNER_PORTAL_BUILD_ENV: dev
+ENTERPRISE_LEARNER_PORTAL_BUILD_ENV_EXTRAS:
+  FEATURE_CONTENT_HIGHLIGHTS: false
 ```
-
-Then rebuild mfe tutor image using `tutor images build mfe` and launch tutor in dev mode using `tutor dev launch`. This is workaround is required until the utility function called [getProxyLoginUrl](https://github.com/openedx/frontend-enterprise/blob/83e8405e8768c8ea5d87dd40164d8266cb4ee7f0/packages/logistration/src/utils.js#L20) from `frontend-app-logistration` component reads `LMS_BASE_URL` from env instead of making use of mfe_config.
 
 ## Developing MFE's using Tutor
 

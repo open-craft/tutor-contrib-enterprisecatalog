@@ -1,3 +1,6 @@
+# Note about LMS_BASE_URL
+# This is workaround is required until the utility function called [getProxyLoginUrl](https://github.com/openedx/frontend-enterprise/blob/83e8405e8768c8ea5d87dd40164d8266cb4ee7f0/packages/logistration/src/utils.js#L20) from `frontend-app-logistration` component reads `LMS_BASE_URL` from env instead of making use of mfe_config.
+
 {% if ENTERPRISE_ADMIN_PORTAL_BUILD_ENV == "dev" %}
 ENV LMS_BASE_URL=http://{{ LMS_HOST }}:8000
 ENV ECOMMERCE_BASE_URL=http://{{ ECOMMERCE_HOST }}:8130
