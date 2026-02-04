@@ -69,7 +69,7 @@ RUN DJANGO_SETTINGS_MODULE=enterprise_catalog.settings.assets make static
 
 # Run production server
 ENV DJANGO_SETTINGS_MODULE enterprise_catalog.settings.tutor.production
-EXPOSE 8160
+EXPOSE {{ ENTERPRISE_CATALOG_PORT }}
 CMD gunicorn \
     --reload \
     --workers=2 \

@@ -1,5 +1,4 @@
 from glob import glob
-import enum
 import os
 import typing as t
 
@@ -29,6 +28,7 @@ catalog_config = {
         "DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-enterprise-catalog:{{ ENTERPRISE_CATALOG_VERSION }}",
         "WORKER_DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-enterprise-catalog-worker:{{ ENTERPRISE_CATALOG_VERSION }}",
         "HOST": "enterprise-catalog.{{ LMS_HOST }}",
+        "PORT": 8160,
         "EXTRA_PIP_REQUIREMENTS": [],
         "MYSQL_DATABASE": "enterprisecatalog",
         "MYSQL_USERNAME": "enterprisecatalog",
@@ -81,6 +81,7 @@ license_manager_config = {
         "WORKER_DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-license-manager-worker:{{ LICENSE_MANAGER_VERSION }}",
         "BULK_ENROLLMENT_WORKER_DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-license-manager-bulk-enrollment-worker:{{ LICENSE_MANAGER_VERSION }}",
         "HOST": "license-manager.{{ LMS_HOST }}",
+        "PORT": 8170,
         "EXTRA_PIP_REQUIREMENTS": [],
         "MYSQL_DATABASE": "licensemanager",
         "MYSQL_USERNAME": "licensemanager",
@@ -113,6 +114,7 @@ access_config = {
         "DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-enterprise-access:{{ ENTERPRISE_ACCESS_VERSION }}",
         "WORKER_DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-enterprise-access-worker:{{ ENTERPRISE_ACCESS_VERSION }}",
         "HOST": "enterprise-access.{{ LMS_HOST }}",
+        "PORT": 8270,
         "EXTRA_PIP_REQUIREMENTS": [],
         "MYSQL_DATABASE": "enterpriseaccess",
         "MYSQL_USERNAME": "enterpriseaccess",
@@ -150,6 +152,7 @@ subsidy_config = {
         "VERSION": __version__,
         "DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-enterprise-subsidy:{{ ENTERPRISE_SUBSIDY_VERSION }}",
         "HOST": "enterprise-subsidy.{{ LMS_HOST }}",
+        "PORT": 8280,
         "EXTRA_PIP_REQUIREMENTS": [],
         "MYSQL_DATABASE": "enterprisesubsidy",
         "MYSQL_USERNAME": "enterprisesubsidy",
@@ -261,10 +264,10 @@ def _print_apps_public_hosts(
 ) -> list[str]:
     if context_name == "dev":
         hosts += [
-            "{{ ENTERPRISE_CATALOG_HOST }}:8160",
-            "{{ LICENSE_MANAGER_HOST }}:8170",
-            "{{ ENTERPRISE_ACCESS_HOST }}:8270",
-            "{{ ENTERPRISE_SUBSIDY_HOST }}:8280",
+            "{{ ENTERPRISE_CATALOG_HOST }}:{{ ENTERPRISE_CATALOG_PORT }}",
+            "{{ LICENSE_MANAGER_HOST }}:{{ LICENSE_MANAGER_PORT }}",
+            "{{ ENTERPRISE_ACCESS_HOST }}:{{ ENTERPRISE_ACCESS_PORT }}",
+            "{{ ENTERPRISE_SUBSIDY_HOST }}:{{ ENTERPRISE_SUBSIDY_PORT }}",
         ]
     else:
         hosts += [

@@ -20,7 +20,7 @@ LMS_BASE_URL = "http://{{ LMS_HOST }}:8000"
 DISCOVERY_SERVICE_API_URL = "http://{{ DISCOVERY_HOST }}:8381/api/v1/"
 ECOMMERCE_BASE_URL = "http://{{ ECOMMERCE_HOST }}:8130"
 ENTERPRISE_LEARNER_PORTAL_BASE_URL = "http://{{ MFE_HOST }}:8734/learner-portal-enterprise"
-LICENSE_MANAGER_BASE_URL = "http://{{ LICENSE_MANAGER_HOST }}:8170"
+LICENSE_MANAGER_BASE_URL = "http://{{ LICENSE_MANAGER_HOST }}:{{ LICENSE_MANAGER_PORT }}"
 
 # Logging: get rid of local handler
 logging_config = get_logger_config(

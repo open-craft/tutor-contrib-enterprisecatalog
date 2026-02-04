@@ -28,7 +28,7 @@ export ENTERPRISE_CATALOG_ENTERPRISE_WORKER_EMAIL={{ ENTERPRISE_CATALOG_ENTERPRI
 # Development client
 ./manage.py lms create_dot_application \
     --grant-type client-credentials \
-    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_CATALOG_HOST }}:8160/complete/edx-oauth2/" \
+    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_CATALOG_HOST }}:{{ ENTERPRISE_CATALOG_PORT }}/complete/edx-oauth2/" \
     --client-id {{ ENTERPRISE_CATALOG_OAUTH2_KEY_DEV }} \
     --client-secret {{ ENTERPRISE_CATALOG_OAUTH2_SECRET }} \
     --scopes user_id \
@@ -38,7 +38,7 @@ export ENTERPRISE_CATALOG_ENTERPRISE_WORKER_EMAIL={{ ENTERPRISE_CATALOG_ENTERPRI
     {{ ENTERPRISE_CATALOG_WORKER_NAME }}
 ./manage.py lms create_dot_application \
     --grant-type authorization-code \
-    --redirect-uris "http://{{ ENTERPRISE_CATALOG_HOST }}:8160/complete/edx-oauth2/" \
+    --redirect-uris "http://{{ ENTERPRISE_CATALOG_HOST }}:{{ ENTERPRISE_CATALOG_PORT }}/complete/edx-oauth2/" \
     --client-id {{ ENTERPRISE_CATALOG_OAUTH2_KEY_SSO_DEV }} \
     --client-secret {{ ENTERPRISE_CATALOG_OAUTH2_SECRET_SSO }} \
     --scopes user_id \

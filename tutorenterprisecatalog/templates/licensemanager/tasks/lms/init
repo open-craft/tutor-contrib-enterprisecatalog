@@ -11,7 +11,7 @@ export LICENSE_MANAGER_WORKER_EMAIL={{ LICENSE_MANAGER_WORKER_EMAIL }}
 # Development client
 ./manage.py lms create_dot_application \
     --grant-type client-credentials \
-    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LICENSE_MANAGER_HOST }}:8170/complete/edx-oauth2/" \
+    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LICENSE_MANAGER_HOST }}:{{ LICENSE_MANAGER_PORT }}/complete/edx-oauth2/" \
     --client-id {{ LICENSE_MANAGER_OAUTH2_KEY_DEV }} \
     --client-secret {{ LICENSE_MANAGER_OAUTH2_SECRET }} \
     --scopes user_id \
@@ -21,7 +21,7 @@ export LICENSE_MANAGER_WORKER_EMAIL={{ LICENSE_MANAGER_WORKER_EMAIL }}
     {{ LICENSE_MANAGER_WORKER_NAME }}
 ./manage.py lms create_dot_application \
     --grant-type authorization-code \
-    --redirect-uris "http://{{ LICENSE_MANAGER_HOST }}:8170/complete/edx-oauth2/" \
+    --redirect-uris "http://{{ LICENSE_MANAGER_HOST }}:{{ LICENSE_MANAGER_PORT }}/complete/edx-oauth2/" \
     --client-id {{ LICENSE_MANAGER_OAUTH2_KEY_SSO_DEV }} \
     --client-secret {{ LICENSE_MANAGER_OAUTH2_SECRET_SSO }} \
     --scopes user_id \

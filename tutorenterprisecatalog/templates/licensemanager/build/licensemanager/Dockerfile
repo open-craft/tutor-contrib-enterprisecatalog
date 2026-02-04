@@ -76,7 +76,7 @@ RUN DJANGO_SETTINGS_MODULE=license_manager.settings.assets make static
 
 # Run production server
 ENV DJANGO_SETTINGS_MODULE license_manager.settings.tutor.production
-EXPOSE 18170
+EXPOSE {{ LICENSE_MANAGER_PORT }}
 CMD gunicorn \
     --reload \
     --workers=2 \

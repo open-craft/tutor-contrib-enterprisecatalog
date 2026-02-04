@@ -1,7 +1,7 @@
 enterprise-catalog:
   environment:
     DJANGO_SETTINGS_MODULE: enterprise_catalog.settings.tutor.development
-  command: python3 manage.py runserver 0.0.0.0:8160
+  command: python3 manage.py runserver 0.0.0.0:{{ ENTERPRISE_CATALOG_PORT }}
   stdin_open: true
   tty: true
   {%- for mount in iter_mounts(MOUNTS, "enterprise-catalog") %}
@@ -9,7 +9,7 @@ enterprise-catalog:
     - {{ mount }}
   {%- endfor %}
   ports:
-    - "8160:8160"
+    - "{{ ENTERPRISE_CATALOG_PORT }}:{{ ENTERPRISE_CATALOG_PORT }}"
   networks:
     default:
       aliases:
@@ -31,7 +31,7 @@ enterprise-catalog-worker:
 license-manager:
   environment:
     DJANGO_SETTINGS_MODULE: license_manager.settings.tutor.development
-  command: python3 manage.py runserver 0.0.0.0:8170
+  command: python3 manage.py runserver 0.0.0.0:{{ LICENSE_MANAGER_PORT }}
   stdin_open: true
   tty: true
   {%- for mount in iter_mounts(MOUNTS, "license-manager") %}
@@ -39,7 +39,7 @@ license-manager:
     - {{ mount }}
   {%- endfor %}
   ports:
-    - "8170:8170"
+    - "{{ LICENSE_MANAGER_PORT }}:{{ LICENSE_MANAGER_PORT }}"
   networks:
     default:
       aliases:
@@ -74,7 +74,7 @@ license-manager-bulk-enrollment-worker:
 enterprise-access:
   environment:
     DJANGO_SETTINGS_MODULE: enterprise_access.settings.tutor.development
-  command: python3 manage.py runserver 0.0.0.0:8270
+  command: python3 manage.py runserver 0.0.0.0:{{ ENTERPRISE_ACCESS_PORT }}
   stdin_open: true
   tty: true
   {%- for mount in iter_mounts(MOUNTS, "enterprise-access") %}
@@ -82,7 +82,7 @@ enterprise-access:
     - {{ mount }}
   {%- endfor %}
   ports:
-    - "8270:8270"
+    - "{{ ENTERPRISE_ACCESS_PORT }}:{{ ENTERPRISE_ACCESS_PORT }}"
   networks:
     default:
       aliases:
@@ -104,7 +104,7 @@ enterprise-access-worker:
 enterprise-subsidy:
   environment:
     DJANGO_SETTINGS_MODULE: enterprise_subsidy.settings.tutor.development
-  command: python3 manage.py runserver 0.0.0.0:8280
+  command: python3 manage.py runserver 0.0.0.0:{{ ENTERPRISE_SUBSIDY_PORT }}
   stdin_open: true
   tty: true
   {%- for mount in iter_mounts(MOUNTS, "enterprise-subsidy") %}
@@ -112,7 +112,7 @@ enterprise-subsidy:
     - {{ mount }}
   {%- endfor %}
   ports:
-    - "8280:8280"
+    - "{{ ENTERPRISE_SUBSIDY_PORT }}:{{ ENTERPRISE_SUBSIDY_PORT }}"
   networks:
     default:
       aliases:
