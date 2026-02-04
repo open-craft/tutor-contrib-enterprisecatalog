@@ -1,1 +1,20 @@
-ENV LMS_BASE_URL='{% if LMS_BASE_URL is defined %}{{ LMS_BASE_URL }}{% else %}{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}{% endif %}'
+{% if ENTERPRISE_ADMIN_PORTAL_BUILD_ENV == "dev" %}
+ENV LMS_BASE_URL=http://{{ LMS_HOST }}:8000
+ENV ECOMMERCE_BASE_URL=http://{{ ECOMMERCE_HOST }}:8130
+ENV ENTERPRISE_SUBSIDY_BASE_URL=http://{{ ENTERPRISE_SUBSIDY_HOST }}:{{ ENTERPRISE_SUBSIDY_PORT }}
+ENV ENTERPRISE_CATALOG_BASE_URL=http://{{ ENTERPRISE_CATALOG_HOST }}:{{ ENTERPRISE_CATALOG_PORT }}
+ENV ENTERPRISE_ACCESS_BASE_URL=http://{{ ENTERPRISE_ACCESS_HOST }}:{{ ENTERPRISE_ACCESS_PORT }}
+ENV LICENSE_MANAGER_BASE_URL=http://{{ LICENSE_MANAGER_HOST }}:{{ LICENSE_MANAGER_PORT }}
+{% else %}
+ENV LMS_BASE_URL={% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}
+ENV ECOMMERCE_BASE_URL={% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ECOMMERCE_HOST }}
+ENV ENTERPRISE_SUBSIDY_BASE_URL={% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_SUBSIDY_HOST }}
+ENV ENTERPRISE_CATALOG_BASE_URL={% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_CATALOG_HOST }}
+ENV ENTERPRISE_ACCESS_BASE_URL={% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_ACCESS_HOST }}
+ENV LICENSE_MANAGER_BASE_URL={% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LICENSE_MANAGER_HOST }}
+{% endif %}
+
+{%- for key, value in ENTERPRISE_ADMIN_PORTAL_BUILD_ENV_EXTRAS.items() %}
+ENV {{ key }}={{ value }}
+{%- endfor %}
+RUN rm /openedx/app/env.config.jsx

@@ -448,6 +448,32 @@ for mfe_name in MFES:
     tutor_hooks.Filters.IMAGES_PULL.add_item((f"{mfe_name}-dev", tag))
     tutor_hooks.Filters.IMAGES_PUSH.add_item((f"{mfe_name}-dev", tag))
 
+# The enterprise MFEs do not have the full support for MFE_CONFIG_API[1]. Hence
+# some values need to be set in .env file or as envvars during the build time.
+# Since `tutor images build mfe` creates the same image for both `tutor dev launch`
+# and `tutor local launch`, we can't fully rely on the runtime config to have the
+# right URLs to all the enterprise services.
+#
+# So, we have added 2 values for each MFE.
+# 1. The <APP>_BUILD_ENV can be set to `prod` or `dev` to indicate the service URLs
+#    to use during the MFE build. For dev, this would use the <host>:<port> URL and
+#    for prod, this would use http(s)://<host>.
+# 2. <APP>_BUILD_ENV_EXTRAS - this is a dict that can be defined in the YAML to set
+#    any extra build time config that's needed. Both the enterprise MFEs,
+#    enable/disable support for specific features using feature flags in the .env
+#    file. This would be the place to set those values.
+#
+# [1]: https://docs.openedx.org/projects/edx-platform/en/latest/references/docs/lms/djangoapps/mfe_config_api/docs/decisions/0001-mfe-config-api.html
+tutor_hooks.Filters.CONFIG_DEFAULTS.add_items(
+    [
+        ("ENTERPRISE_LEARNER_PORTAL_BUILD_ENV", "prod"),
+        ("ENTERPRISE_ADMIN_PORTAL_BUILD_ENV", "prod"),
+        ("ENTERPRISE_LEARNER_PORTAL_BUILD_ENV_EXTRAS", {}),
+        ("ENTERPRISE_ADMIN_PORTAL_BUILD_ENV_EXTRAS", {}),
+    ]
+)
+
+
 
 # Load patches from files
 for path in glob(os.path.join(HERE, "patches", "*")):
