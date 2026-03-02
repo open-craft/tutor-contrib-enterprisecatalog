@@ -412,7 +412,7 @@ tutor_hooks.Filters.IMAGES_PUSH.add_items(
 
 MFES = {
     "enterprise": {
-        "repository": "https://github.com/openedx/frontend-app-learner-portal-enterprise.git",
+        "repository": "https://github.com/open-craft/frontend-app-learner-portal-enterprise.git",
         "port": 8734,
         "version": "agrendalath/course-finder-only",
     },
