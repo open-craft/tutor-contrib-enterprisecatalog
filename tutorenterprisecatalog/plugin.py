@@ -124,7 +124,7 @@ access_config = {
         "OAUTH2_KEY_SSO_DEV": "enterprise-access-sso-dev",
         "CACHE_REDIS_DB": "{{ OPENEDX_CACHE_REDIS_DB }}",
         "REPOSITORY": "https://github.com/openedx/enterprise-access.git",
-        "REPOSITORY_VERSION": "main",
+        "REPOSITORY_VERSION": "{{ OPENEDX_COMMON_VERSION }}",
         "WORKER_NAME": "enterprise_access_worker",
         "WORKER_EMAIL": "enterprise_access_worker@openedx",
     },
@@ -163,7 +163,8 @@ subsidy_config = {
         "CACHE_REDIS_DB": "{{ OPENEDX_CACHE_REDIS_DB }}",
         "REPOSITORY": "https://github.com/openedx/enterprise-subsidy.git",
         "REPOSITORY_VERSION": "main",
-        "REPOSITORY_COMMIT": "",
+        # Pinned to the most recent commit when testing with Ulmo release.
+        "REPOSITORY_COMMIT": "e484ba7966e63d24aabe621de886c895d7b68b91",
         "WORKER_NAME": "enterprise_subsidy_worker",
         "WORKER_EMAIL": "enterprise_subsidy_worker@openedx",
     },
@@ -413,7 +414,7 @@ MFES = {
     "enterprise": {
         "repository": "https://github.com/openedx/frontend-app-learner-portal-enterprise.git",
         "port": 8734,
-        "version": "master",
+        "version": "agrendalath/course-finder-only",
     },
     "admin-enterprise": {
         "repository": "https://github.com/open-craft/frontend-app-admin-portal.git",

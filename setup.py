@@ -43,7 +43,7 @@ setup(
         "tutor-mfe>=21.0.0,<22.0.0"
     ],
     extras_require={"dev": "tutor[dev]>=20.0.0,<22.0.0"},
-    python_requires=">=3.8",
+    python_requires=">=3.11",
     entry_points={
         "tutor.plugin.v1": ["enterprise-catalog = tutorenterprisecatalog.plugin"]
     },
@@ -53,8 +53,6 @@ setup(
         "License :: OSI Approved :: GNU Affero General Public License v3",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
     ],

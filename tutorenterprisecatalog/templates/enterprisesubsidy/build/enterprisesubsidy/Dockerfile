@@ -47,6 +47,9 @@ ENV PATH="/openedx/venv/bin:$PATH"
 
 RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install -r requirements/pip.txt
 
+# TODO: Remove this once tzdata is added in the upstream requirements
+RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install tzdata
+
 # Install python requirements
 # This is identical to "make production-requirements" but it was split in multiple
 # instructions to benefit from docker image caching
