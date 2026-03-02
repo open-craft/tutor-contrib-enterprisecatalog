@@ -16,16 +16,15 @@ SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = SOCIAL_AUTH_EDX_OAUTH2_ISSUER
 SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT = SOCIAL_AUTH_EDX_OAUTH2_ISSUER
 SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL = SOCIAL_AUTH_EDX_OAUTH2_ISSUER + "/logout"
 
-LMS_BASE_URL = "http://{{ LMS_HOST }}:8000"
+LMS_URL = "http://{{ LMS_HOST }}:8000"
 ENTERPRISE_LEARNER_PORTAL_BASE_URL = "http://{{ MFE_HOST }}:8734/learner-portal-enterprise"
-ENTERPRISE_CATALOG_URL = 'http://{{ ENTERPRISE_CATALOG_HOST }}:8160'
+ENTERPRISE_CATALOG_URL = 'http://{{ ENTERPRISE_CATALOG_HOST }}:{{ ENTERPRISE_CATALOG_PORT }}'
 
 # Logging: get rid of local handler
 logging_config = get_logger_config(
-    log_dir="/var/log",
-    edx_filename="license_manager_worker.log",
-    dev_env=True,
-    debug=False,
+    logging_env="development",
+    debug=True,
+    service_variant="license-manager-worker",
 )
 if "local" in logging_config["handlers"]:
     logging_config["handlers"].pop("local")

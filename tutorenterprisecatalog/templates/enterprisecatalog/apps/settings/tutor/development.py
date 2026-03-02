@@ -17,10 +17,10 @@ LMS_BASE_URL = "http://{{ LMS_HOST }}:8000"
 DISCOVERY_SERVICE_API_URL = "http://{{ DISCOVERY_HOST }}:8381/api/v1/"
 ECOMMERCE_BASE_URL = "http://{{ ECOMMERCE_HOST }}:8130"
 ENTERPRISE_LEARNER_PORTAL_BASE_URL = "http://{{ MFE_HOST }}:8734/learner-portal-enterprise"
-LICENSE_MANAGER_BASE_URL = "http://{{ LICENSE_MANAGER_HOST }}:8170"
+LICENSE_MANAGER_BASE_URL = "http://{{ LICENSE_MANAGER_HOST }}:{{ LICENSE_MANAGER_PORT }}"
 
 {% for app_name, app in iter_mfes() %}
-{% if app_name in ["learner-portal-enterprise", "admin-portal-enterprise"] %}
+{% if app_name in ["enterprise", "admin-enterprise"] %}
 CORS_ORIGIN_WHITELIST.append("http://{{ MFE_HOST }}:{{ app['port'] }}")
 CSRF_TRUSTED_ORIGINS.append("http://{{ MFE_HOST }}:{{ app['port'] }}")
 {% endif %}

@@ -11,7 +11,7 @@ export ENTERPRISE_SUBSIDY_WORKER_EMAIL={{ ENTERPRISE_SUBSIDY_WORKER_EMAIL }}
 # Development client
 ./manage.py lms create_dot_application \
     --grant-type client-credentials \
-    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_SUBSIDY_HOST }}:8280/complete/edx-oauth2/" \
+    --redirect-uris "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ ENTERPRISE_SUBSIDY_HOST }}:{{ ENTERPRISE_SUBSIDY_PORT }}/complete/edx-oauth2/" \
     --client-id {{ ENTERPRISE_SUBSIDY_OAUTH2_KEY_DEV }} \
     --client-secret {{ ENTERPRISE_SUBSIDY_OAUTH2_SECRET }} \
     --scopes user_id \
@@ -21,7 +21,7 @@ export ENTERPRISE_SUBSIDY_WORKER_EMAIL={{ ENTERPRISE_SUBSIDY_WORKER_EMAIL }}
     {{ ENTERPRISE_SUBSIDY_WORKER_NAME }}
 ./manage.py lms create_dot_application \
     --grant-type authorization-code \
-    --redirect-uris "http://{{ ENTERPRISE_SUBSIDY_HOST }}:8280/complete/edx-oauth2/" \
+    --redirect-uris "http://{{ ENTERPRISE_SUBSIDY_HOST }}:{{ ENTERPRISE_SUBSIDY_PORT }}/complete/edx-oauth2/" \
     --client-id {{ ENTERPRISE_SUBSIDY_OAUTH2_KEY_SSO_DEV }} \
     --client-secret {{ ENTERPRISE_SUBSIDY_OAUTH2_SECRET_SSO }} \
     --scopes user_id \

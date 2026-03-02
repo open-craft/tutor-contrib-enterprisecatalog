@@ -42,4 +42,4 @@ if created:
     user.save()
 "
 
-./manage.py update_content_metadata --force
+#./manage.py update_content_metadata --force

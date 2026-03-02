@@ -1,7 +1,8 @@
 from glob import glob
 import os
-import pkg_resources
 import typing as t
+
+import click
 
 from tutor import hooks as tutor_hooks
 from tutor.__about__ import __version_suffix__
@@ -27,6 +28,7 @@ catalog_config = {
         "DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-enterprise-catalog:{{ ENTERPRISE_CATALOG_VERSION }}",
         "WORKER_DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-enterprise-catalog-worker:{{ ENTERPRISE_CATALOG_VERSION }}",
         "HOST": "enterprise-catalog.{{ LMS_HOST }}",
+        "PORT": 8160,
         "EXTRA_PIP_REQUIREMENTS": [],
         "MYSQL_DATABASE": "enterprisecatalog",
         "MYSQL_USERNAME": "enterprisecatalog",
@@ -56,6 +58,8 @@ catalog_config = {
         "ALGOLIA_SEARCH_API_KEY": "",
         "ALGOLIA_INDEX_NAME": "",
         "ALGOLIA_INDEX_NAME_JOBS": "",
+        "ALGOLIA_REPLICA_INDEX_NAME": "",
+        "ALGOLIA_ADMIN_API_KEY": "",
     },
     # Include information to be used by loop below
     "repo_name": "enterprise-catalog",
@@ -77,6 +81,7 @@ license_manager_config = {
         "WORKER_DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-license-manager-worker:{{ LICENSE_MANAGER_VERSION }}",
         "BULK_ENROLLMENT_WORKER_DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-license-manager-bulk-enrollment-worker:{{ LICENSE_MANAGER_VERSION }}",
         "HOST": "license-manager.{{ LMS_HOST }}",
+        "PORT": 8170,
         "EXTRA_PIP_REQUIREMENTS": [],
         "MYSQL_DATABASE": "licensemanager",
         "MYSQL_USERNAME": "licensemanager",
@@ -109,6 +114,7 @@ access_config = {
         "DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-enterprise-access:{{ ENTERPRISE_ACCESS_VERSION }}",
         "WORKER_DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-enterprise-access-worker:{{ ENTERPRISE_ACCESS_VERSION }}",
         "HOST": "enterprise-access.{{ LMS_HOST }}",
+        "PORT": 8270,
         "EXTRA_PIP_REQUIREMENTS": [],
         "MYSQL_DATABASE": "enterpriseaccess",
         "MYSQL_USERNAME": "enterpriseaccess",
@@ -125,7 +131,13 @@ access_config = {
     # Include information to be used by loop below
     "repo_name": "enterprise-access",
     "app_name": "enterprise-access",
-    "init_tasks": ("mysql", "lms", "enterprise-access", "discovery", "enterprise-subsidy"),
+    "init_tasks": (
+        "mysql",
+        "lms",
+        "enterprise-access",
+        "discovery",
+        "enterprise-subsidy",
+    ),
     "templates_dir": "enterpriseaccess",
 }
 
@@ -140,6 +152,7 @@ subsidy_config = {
         "VERSION": __version__,
         "DOCKER_IMAGE": "{{ DOCKER_REGISTRY }}open-craft/openedx-enterprise-subsidy:{{ ENTERPRISE_SUBSIDY_VERSION }}",
         "HOST": "enterprise-subsidy.{{ LMS_HOST }}",
+        "PORT": 8280,
         "EXTRA_PIP_REQUIREMENTS": [],
         "MYSQL_DATABASE": "enterprisesubsidy",
         "MYSQL_USERNAME": "enterprisesubsidy",
@@ -150,6 +163,8 @@ subsidy_config = {
         "CACHE_REDIS_DB": "{{ OPENEDX_CACHE_REDIS_DB }}",
         "REPOSITORY": "https://github.com/openedx/enterprise-subsidy.git",
         "REPOSITORY_VERSION": "main",
+        # Pinned to the most recent commit when testing with Ulmo release.
+        "REPOSITORY_COMMIT": "e484ba7966e63d24aabe621de886c895d7b68b91",
         "WORKER_NAME": "enterprise_subsidy_worker",
         "WORKER_EMAIL": "enterprise_subsidy_worker@openedx",
     },
@@ -162,16 +177,16 @@ subsidy_config = {
 
 # Add the "templates" folder as a template root
 tutor_hooks.Filters.ENV_TEMPLATE_ROOTS.add_item(
-    pkg_resources.resource_filename("tutorenterprisecatalog", "templates")
+    os.path.join(HERE, "templates"),
 )
 
 # Warning: Do not change below order
 configurations = [
-    ('ENTERPRISE_CATALOG_', catalog_config),
-    ('LICENSE_MANAGER_', license_manager_config),
+    ("ENTERPRISE_CATALOG_", catalog_config),
+    ("LICENSE_MANAGER_", license_manager_config),
     # Subsidy needs to be initialized before access as a task in access folder depends on subsidy database being initialized
-    ('ENTERPRISE_SUBSIDY_', subsidy_config),
-    ('ENTERPRISE_ACCESS_', access_config),
+    ("ENTERPRISE_SUBSIDY_", subsidy_config),
+    ("ENTERPRISE_ACCESS_", access_config),
 ]
 
 for prefix, config in configurations:
@@ -187,7 +202,9 @@ for prefix, config in configurations:
     tutor_hooks.Filters.CONFIG_UNIQUE.add_items(
         [(f"{prefix}{key}", value) for key, value in config.get("unique", {}).items()]
     )
-    tutor_hooks.Filters.CONFIG_OVERRIDES.add_items(list(config.get("overrides", {}).items()))
+    tutor_hooks.Filters.CONFIG_OVERRIDES.add_items(
+        list(config.get("overrides", {}).items())
+    )
 
     # Render the "build" and "apps" folders
     tutor_hooks.Filters.ENV_TEMPLATE_TARGETS.add_items(
@@ -201,7 +218,8 @@ for prefix, config in configurations:
     for service in config["init_tasks"]:
         with open(
             os.path.join(
-                pkg_resources.resource_filename("tutorenterprisecatalog", "templates"),
+                HERE,
+                "templates",
                 config["templates_dir"],
                 "tasks",
                 service,
@@ -219,7 +237,9 @@ for prefix, config in configurations:
 
 # Automount /openedx/enterprise-catalog folder from the container
 @tutor_hooks.Filters.COMPOSE_MOUNTS.add()
-def _mount_repositories(mounts: list[tuple[str, str]], name: str) -> list[tuple[str, str]]:
+def _mount_repositories(
+    mounts: list[tuple[str, str]], name: str
+) -> list[tuple[str, str]]:
     repos = {config["repo_name"]: config["app_name"] for _, config in configurations}
     if name in repos:
         mounts.append((repos[name], f"/openedx/{name}"))
@@ -245,10 +265,10 @@ def _print_apps_public_hosts(
 ) -> list[str]:
     if context_name == "dev":
         hosts += [
-            "{{ ENTERPRISE_CATALOG_HOST }}:8160",
-            "{{ LICENSE_MANAGER_HOST }}:8170",
-            "{{ ENTERPRISE_ACCESS_HOST }}:8270",
-            "{{ ENTERPRISE_SUBSIDY_HOST }}:8280",
+            "{{ ENTERPRISE_CATALOG_HOST }}:{{ ENTERPRISE_CATALOG_PORT }}",
+            "{{ LICENSE_MANAGER_HOST }}:{{ LICENSE_MANAGER_PORT }}",
+            "{{ ENTERPRISE_ACCESS_HOST }}:{{ ENTERPRISE_ACCESS_PORT }}",
+            "{{ ENTERPRISE_SUBSIDY_HOST }}:{{ ENTERPRISE_SUBSIDY_PORT }}",
         ]
     else:
         hosts += [
@@ -391,29 +411,33 @@ tutor_hooks.Filters.IMAGES_PUSH.add_items(
 )
 
 MFES = {
-    "learner-portal-enterprise": {
-        "repository": "https://github.com/openedx/frontend-app-learner-portal-enterprise.git",
+    "enterprise": {
+        "repository": "https://github.com/open-craft/frontend-app-learner-portal-enterprise.git",
         "port": 8734,
-        "version": "master",
+        "version": "agrendalath/course-finder-only",
     },
-    # npm install fails due to corrupted file dependency
-    # https://github.com/openedx/frontend-app-admin-portal/blob/7e36288a6a6a26d74ac96cf4b11b92d2238fc3e3/package.json#L49
-    # "admin-portal-enterprise": {
-    #     "repository": "https://github.com/openedx/frontend-app-admin-portal.git",
-    #     "port": 1991,
-    #     "version": "master",
-    # },
+    "admin-enterprise": {
+        "repository": "https://github.com/open-craft/frontend-app-admin-portal.git",
+        "port": 1991,
+        # NOTE: The custom branch fixes an issue with pulling translations during image build.
+        # OPEN PR: https://github.com/openedx/frontend-app-admin-portal/pull/1734
+        "version": "tecoholic/BB-10168-fix-make-pull-translations",
+    },
 }
 
 
 @MFE_APPS.add()
-def _add_enterprise_catalog_mfe_apps(apps: dict[str, MFE_ATTRS_TYPE]) -> dict[str, MFE_ATTRS_TYPE]:
+def _add_enterprise_catalog_mfe_apps(
+    apps: dict[str, MFE_ATTRS_TYPE],
+) -> dict[str, MFE_ATTRS_TYPE]:
     apps.update(MFES)
     return apps
 
 
 for mfe_name in MFES:
-    tag = "{{ DOCKER_REGISTRY }}open-craft/openedx-" + mfe_name + "-dev:{{ MFE_VERSION }}"
+    tag = (
+        "{{ DOCKER_REGISTRY }}open-craft/openedx-" + mfe_name + "-dev:{{ MFE_VERSION }}"
+    )
     tutor_hooks.Filters.IMAGES_BUILD.add_item(
         (
             f"{mfe_name}-dev",
@@ -425,13 +449,57 @@ for mfe_name in MFES:
     tutor_hooks.Filters.IMAGES_PULL.add_item((f"{mfe_name}-dev", tag))
     tutor_hooks.Filters.IMAGES_PUSH.add_item((f"{mfe_name}-dev", tag))
 
+# The enterprise MFEs do not have the full support for MFE_CONFIG_API[1]. Hence
+# some values need to be set in .env file or as envvars during the build time.
+# Since `tutor images build mfe` creates the same image for both `tutor dev launch`
+# and `tutor local launch`, we can't fully rely on the runtime config to have the
+# right URLs to all the enterprise services.
+#
+# So, we have added 2 values for each MFE.
+# 1. The <APP>_BUILD_ENV can be set to `prod` or `dev` to indicate the service URLs
+#    to use during the MFE build. For dev, this would use the <host>:<port> URL and
+#    for prod, this would use http(s)://<host>.
+# 2. <APP>_BUILD_ENV_EXTRAS - this is a dict that can be defined in the YAML to set
+#    any extra build time config that's needed. Both the enterprise MFEs,
+#    enable/disable support for specific features using feature flags in the .env
+#    file. This would be the place to set those values.
+#
+# [1]: https://docs.openedx.org/projects/edx-platform/en/latest/references/docs/lms/djangoapps/mfe_config_api/docs/decisions/0001-mfe-config-api.html
+tutor_hooks.Filters.CONFIG_DEFAULTS.add_items(
+    [
+        ("ENTERPRISE_LEARNER_PORTAL_BUILD_ENV", "prod"),
+        ("ENTERPRISE_ADMIN_PORTAL_BUILD_ENV", "prod"),
+        ("ENTERPRISE_LEARNER_PORTAL_BUILD_ENV_EXTRAS", {}),
+        ("ENTERPRISE_ADMIN_PORTAL_BUILD_ENV_EXTRAS", {}),
+    ]
+)
+
+
 
 # Load patches from files
-for path in glob(
-    os.path.join(
-        pkg_resources.resource_filename("tutorenterprisecatalog", "patches"),
-        "*",
-    )
-):
+for path in glob(os.path.join(HERE, "patches", "*")):
     with open(path, encoding="utf-8") as patch_file:
-        tutor_hooks.Filters.ENV_PATCHES.add_item((os.path.basename(path), patch_file.read()))
+        tutor_hooks.Filters.ENV_PATCHES.add_item(
+            (os.path.basename(path), patch_file.read())
+        )
+
+
+
+@click.command()
+@click.argument("service", type=click.Choice([
+    "enterprise-catalog",
+    "enterprise-subsidy",
+    "enterprise-access",
+    "license-manager",
+], case_sensitive=False))
+@click.argument("email")
+def enterprise_make_staff(service: str, email: str) -> t.Iterator[tuple[str, str]]:
+    """Make a user staff and superuser by email on the specificed enterprise service."""
+    command = f"""./manage.py shell -c \
+"from django.contrib.auth import get_user_model; \
+get_user_model().objects.filter(email='{email}').update(is_staff=True, is_superuser=True)"
+"""
+    yield (service, command)
+
+
+tutor_hooks.Filters.CLI_DO_COMMANDS.add_item(enterprise_make_staff)

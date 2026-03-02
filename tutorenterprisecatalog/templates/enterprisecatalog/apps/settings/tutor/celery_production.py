@@ -26,10 +26,9 @@ LICENSE_MANAGER_BASE_URL = "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}:
 
 # Logging: get rid of local handler
 logging_config = get_logger_config(
-    log_dir="/var/log",
-    edx_filename="enterprise_catalog_worker.log",
-    dev_env=False,
+    logging_env="production",
     debug=False,
+    service_variant="catalog-worker",
 )
 if "local" in logging_config["handlers"]:
     logging_config["handlers"].pop("local")

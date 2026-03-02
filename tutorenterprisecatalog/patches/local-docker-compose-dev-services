@@ -1,9 +1,15 @@
 enterprise-catalog:
   environment:
     DJANGO_SETTINGS_MODULE: enterprise_catalog.settings.tutor.development
-  command: python3 manage.py runserver 0.0.0.0:8160
+  command: python3 manage.py runserver 0.0.0.0:{{ ENTERPRISE_CATALOG_PORT }}
+  stdin_open: true
+  tty: true
+  {%- for mount in iter_mounts(MOUNTS, "enterprise-catalog") %}
+  volumes:
+    - {{ mount }}
+  {%- endfor %}
   ports:
-    - "8160:8160"
+    - "{{ ENTERPRISE_CATALOG_PORT }}:{{ ENTERPRISE_CATALOG_PORT }}"
   networks:
     default:
       aliases:
@@ -15,13 +21,25 @@ enterprise-catalog-worker:
   ports:
     - "8161:8161"
   command: celery --app=enterprise_catalog.celery:app worker -l DEBUG
+  stdin_open: true
+  tty: true
+  {%- for mount in iter_mounts(MOUNTS, "enterprise-catalog") %}
+  volumes:
+    - {{ mount }}
+  {%- endfor %}
 
 license-manager:
   environment:
     DJANGO_SETTINGS_MODULE: license_manager.settings.tutor.development
-  command: python3 manage.py runserver 0.0.0.0:8170
+  command: python3 manage.py runserver 0.0.0.0:{{ LICENSE_MANAGER_PORT }}
+  stdin_open: true
+  tty: true
+  {%- for mount in iter_mounts(MOUNTS, "license-manager") %}
+  volumes:
+    - {{ mount }}
+  {%- endfor %}
   ports:
-    - "8170:8170"
+    - "{{ LICENSE_MANAGER_PORT }}:{{ LICENSE_MANAGER_PORT }}"
   networks:
     default:
       aliases:
@@ -33,6 +51,12 @@ license-manager-worker:
   ports:
     - "8171:8171"
   command: celery --app=license_manager.celery:app worker -Q license_manager.default -l DEBUG
+  stdin_open: true
+  tty: true
+  {%- for mount in iter_mounts(MOUNTS, "license-manager") %}
+  volumes:
+    - {{ mount }}
+  {%- endfor %}
 
 license-manager-bulk-enrollment-worker:
   environment:
@@ -40,13 +64,25 @@ license-manager-bulk-enrollment-worker:
   ports:
     - "8172:8172"
   command: celery --app=license_manager.celery:app worker -Q license_manager.bulk_enrollment -l DEBUG
+  stdin_open: true
+  tty: true
+  {%- for mount in iter_mounts(MOUNTS, "license-manager") %}
+  volumes:
+    - {{ mount }}
+  {%- endfor %}
 
 enterprise-access:
   environment:
     DJANGO_SETTINGS_MODULE: enterprise_access.settings.tutor.development
-  command: python3 manage.py runserver 0.0.0.0:8270
+  command: python3 manage.py runserver 0.0.0.0:{{ ENTERPRISE_ACCESS_PORT }}
+  stdin_open: true
+  tty: true
+  {%- for mount in iter_mounts(MOUNTS, "enterprise-access") %}
+  volumes:
+    - {{ mount }}
+  {%- endfor %}
   ports:
-    - "8270:8270"
+    - "{{ ENTERPRISE_ACCESS_PORT }}:{{ ENTERPRISE_ACCESS_PORT }}"
   networks:
     default:
       aliases:
@@ -58,13 +94,25 @@ enterprise-access-worker:
   ports:
     - "8271:8271"
   command: celery --app=enterprise_access.celery:app worker -l DEBUG
+  stdin_open: true
+  tty: true
+  {%- for mount in iter_mounts(MOUNTS, "enterprise-access") %}
+  volumes:
+    - {{ mount }}
+  {%- endfor %}
 
 enterprise-subsidy:
   environment:
     DJANGO_SETTINGS_MODULE: enterprise_subsidy.settings.tutor.development
-  command: python3 manage.py runserver 0.0.0.0:8280
+  command: python3 manage.py runserver 0.0.0.0:{{ ENTERPRISE_SUBSIDY_PORT }}
+  stdin_open: true
+  tty: true
+  {%- for mount in iter_mounts(MOUNTS, "enterprise-subsidy") %}
+  volumes:
+    - {{ mount }}
+  {%- endfor %}
   ports:
-    - "8280:8280"
+    - "{{ ENTERPRISE_SUBSIDY_PORT }}:{{ ENTERPRISE_SUBSIDY_PORT }}"
   networks:
     default:
       aliases:
