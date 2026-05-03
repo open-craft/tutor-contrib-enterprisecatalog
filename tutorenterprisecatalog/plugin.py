@@ -411,12 +411,12 @@ tutor_hooks.Filters.IMAGES_PUSH.add_items(
 )
 
 MFES = {
-    "enterprise": {
+    "enterprise-portal": {
         "repository": "https://github.com/open-craft/frontend-app-learner-portal-enterprise.git",
         "port": 8734,
         "version": "agrendalath/course-finder-only",
     },
-    "admin-enterprise": {
+    "enterprise-admin": {
         "repository": "https://github.com/open-craft/frontend-app-admin-portal.git",
         "port": 1991,
         # NOTE: The custom branch fixes an issue with pulling translations during image build.
