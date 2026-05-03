@@ -64,18 +64,21 @@ FROM minimal AS enterprise-subsidy
 
 {{ patch("enterprise-subsidy-dockerfile-post-python-requirements") }}
 
+RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install uwsgi==2.0.30
+
 # Collect static assets
 COPY --chown=app:app assets.py ./enterprise_subsidy/settings/assets.py
 RUN DJANGO_SETTINGS_MODULE=enterprise_subsidy.settings.assets make static
 
 # Run production server
 ENV DJANGO_SETTINGS_MODULE enterprise_subsidy.settings.tutor.production
-EXPOSE 18280
-CMD gunicorn \
-    --reload \
-    --workers=2 \
-    --name enterprise_subsidy \
-    -c /openedx/enterprise-subsidy/enterprise_subsidy/docker_gunicorn_configuration.py \
-    --log-file - \
-    --max-requests=1000 \
-    enterprise_subsidy.wsgi:application
+EXPOSE 8000
+CMD uwsgi \
+    --static-map /static=/openedx/enterprise-subsidy/enterprise_subsidy/assets \
+    --http 0.0.0.0:8000 \
+    --thunder-lock \
+    --single-interpreter \
+    --enable-threads \
+    --processes=2 \
+    --buffer-size=8192 \
+    --wsgi-file enterprise_subsidy/wsgi.py

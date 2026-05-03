@@ -1,0 +1,48 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: enterprise-catalog
+spec:
+  type: NodePort
+  ports:
+    - port: 8000
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: enterprise-catalog
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: license-manager
+spec:
+  type: NodePort
+  ports:
+    - port: 8000
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: license-manager
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: enterprise-access
+spec:
+  type: NodePort
+  ports:
+    - port: 8000
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: enterprise-access
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: enterprise-subsidy
+spec:
+  type: NodePort
+  ports:
+    - port: 8000
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: enterprise-subsidy
