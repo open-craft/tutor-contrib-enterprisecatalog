@@ -1,0 +1,84 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: enterprise-catalog-job
+  labels:
+    app.kubernetes.io/component: job
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: enterprise-catalog
+          image: {{ ENTERPRISE_CATALOG_DOCKER_IMAGE }}
+          volumeMounts:
+            - mountPath: /openedx/enterprise-catalog/enterprise_catalog/settings/tutor/
+              name: settings
+      volumes:
+        - name: settings
+          configMap:
+            name: enterprise-catalog-settings
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: license-manager-job
+  labels:
+    app.kubernetes.io/component: job
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: license-manager
+          image: {{ LICENSE_MANAGER_DOCKER_IMAGE }}
+          volumeMounts:
+            - mountPath: /openedx/license-manager/license_manager/settings/tutor/
+              name: settings
+      volumes:
+        - name: settings
+          configMap:
+            name: license-manager-settings
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: enterprise-access-job
+  labels:
+    app.kubernetes.io/component: job
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: enterprise-access
+          image: {{ ENTERPRISE_ACCESS_DOCKER_IMAGE }}
+          volumeMounts:
+            - mountPath: /openedx/enterprise-access/enterprise_access/settings/tutor/
+              name: settings
+      volumes:
+        - name: settings
+          configMap:
+            name: enterprise-access-settings
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: enterprise-subsidy-job
+  labels:
+    app.kubernetes.io/component: job
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: enterprise-subsidy
+          image: {{ ENTERPRISE_SUBSIDY_DOCKER_IMAGE }}
+          volumeMounts:
+            - mountPath: /openedx/enterprise-subsidy/enterprise_subsidy/settings/tutor/
+              name: settings
+      volumes:
+        - name: settings
+          configMap:
+            name: enterprise-subsidy-settings
