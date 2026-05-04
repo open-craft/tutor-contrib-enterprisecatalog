@@ -69,12 +69,11 @@ RUN DJANGO_SETTINGS_MODULE=enterprise_catalog.settings.assets make static
 
 # Run production server
 ENV DJANGO_SETTINGS_MODULE enterprise_catalog.settings.tutor.production
-EXPOSE {{ ENTERPRISE_CATALOG_PORT }}
+EXPOSE 8000
 CMD gunicorn \
-    --reload \
+    --bind=0.0.0.0:8000 \
     --workers=2 \
     --name enterprise_catalog \
-    -c /openedx/enterprise-catalog/enterprise_catalog/docker_gunicorn_configuration.py \
     --log-file - \
     --max-requests=1000 \
     enterprise_catalog.wsgi:application

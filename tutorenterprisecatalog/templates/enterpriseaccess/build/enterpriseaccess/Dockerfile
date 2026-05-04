@@ -69,12 +69,11 @@ RUN DJANGO_SETTINGS_MODULE=enterprise_access.settings.assets make static
 
 # Run production server
 ENV DJANGO_SETTINGS_MODULE enterprise_access.settings.tutor.production
-EXPOSE 18270
+EXPOSE 8000
 CMD gunicorn \
-    --reload \
+    --bind=0.0.0.0:8000 \
     --workers=2 \
     --name enterprise_access \
-    -c /openedx/enterprise-access/enterprise_access/docker_gunicorn_configuration.py \
     --log-file - \
     --max-requests=1000 \
     enterprise_access.wsgi:application
