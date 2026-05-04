@@ -74,7 +74,7 @@ RUN DJANGO_SETTINGS_MODULE=enterprise_subsidy.settings.assets make static
 ENV DJANGO_SETTINGS_MODULE enterprise_subsidy.settings.tutor.production
 EXPOSE 8000
 CMD uwsgi \
-    --static-map /static=/openedx/enterprise-subsidy/assets \
+    --static-map /static=/openedx/enterprise-subsidy/enterprise_subsidy/assets \
     --http 0.0.0.0:8000 \
     --thunder-lock \
     --single-interpreter \

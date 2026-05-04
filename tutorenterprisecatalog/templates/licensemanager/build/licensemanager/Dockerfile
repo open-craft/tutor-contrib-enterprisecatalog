@@ -80,7 +80,7 @@ RUN DJANGO_SETTINGS_MODULE=license_manager.settings.assets make static
 ENV DJANGO_SETTINGS_MODULE license_manager.settings.tutor.production
 EXPOSE 8000
 CMD uwsgi \
-    --static-map /static=/openedx/license-manager/assets \
+    --static-map /static=/openedx/license-manager/license_manager/assets \
     --http 0.0.0.0:8000 \
     --thunder-lock \
     --single-interpreter \

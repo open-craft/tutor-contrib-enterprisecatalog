@@ -73,7 +73,7 @@ RUN DJANGO_SETTINGS_MODULE=enterprise_access.settings.assets make static
 ENV DJANGO_SETTINGS_MODULE enterprise_access.settings.tutor.production
 EXPOSE 8000
 CMD uwsgi \
-    --static-map /static=/openedx/enterprise-access/assets \
+    --static-map /static=/openedx/enterprise-access/enterprise_access/assets \
     --http 0.0.0.0:8000 \
     --thunder-lock \
     --single-interpreter \

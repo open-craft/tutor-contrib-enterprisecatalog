@@ -73,7 +73,7 @@ RUN DJANGO_SETTINGS_MODULE=enterprise_catalog.settings.assets make static
 ENV DJANGO_SETTINGS_MODULE enterprise_catalog.settings.tutor.production
 EXPOSE 8000
 CMD uwsgi \
-    --static-map /static=/openedx/enterprise-catalog/assets \
+    --static-map /static=/openedx/enterprise-catalog/enterprise_catalog/assets \
     --http 0.0.0.0:8000 \
     --thunder-lock \
     --single-interpreter \
