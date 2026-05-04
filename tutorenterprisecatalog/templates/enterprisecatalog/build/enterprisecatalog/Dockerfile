@@ -63,6 +63,8 @@ FROM minimal AS enterprise-catalog
 
 {{ patch("enterprise-catalog-dockerfile-post-python-requirements") }}
 
+RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install uwsgi==2.0.30
+
 # Collect static assets
 COPY --chown=app:app assets.py ./enterprise_catalog/settings/assets.py
 RUN DJANGO_SETTINGS_MODULE=enterprise_catalog.settings.assets make static
@@ -70,10 +72,12 @@ RUN DJANGO_SETTINGS_MODULE=enterprise_catalog.settings.assets make static
 # Run production server
 ENV DJANGO_SETTINGS_MODULE enterprise_catalog.settings.tutor.production
 EXPOSE 8000
-CMD gunicorn \
-    --bind=0.0.0.0:8000 \
-    --workers=2 \
-    --name enterprise_catalog \
-    --log-file - \
-    --max-requests=1000 \
-    enterprise_catalog.wsgi:application
+CMD uwsgi \
+    --static-map /static=/openedx/enterprise-catalog/assets \
+    --http 0.0.0.0:8000 \
+    --thunder-lock \
+    --single-interpreter \
+    --enable-threads \
+    --processes=2 \
+    --buffer-size=8192 \
+    --wsgi-file enterprise_catalog/wsgi.py
