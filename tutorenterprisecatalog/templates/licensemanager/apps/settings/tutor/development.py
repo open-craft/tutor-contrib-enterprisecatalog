@@ -14,12 +14,12 @@ SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT = SOCIAL_AUTH_EDX_OAUTH2_ISSUER
 SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL = SOCIAL_AUTH_EDX_OAUTH2_ISSUER + "/logout"
 
 LMS_URL = "http://{{ LMS_HOST }}:8000"
-ENTERPRISE_LEARNER_PORTAL_BASE_URL = "http://{{ MFE_HOST }}:8734/learner-portal-enterprise"
+ENTERPRISE_LEARNER_PORTAL_BASE_URL = "http://{{ MFE_HOST }}:8734/enterprise-portal"
 ENTERPRISE_CATALOG_URL = "http://{{ ENTERPRISE_CATALOG_HOST }}:{{ ENTERPRISE_CATALOG_PORT }}"
 
 CORS_ORIGIN_WHITELIST = list(CORS_ORIGIN_WHITELIST)
 {% for app_name, app in iter_mfes() %}
-{% if app_name in ["enterprise", "admin-enterprise"] %}
+{% if app_name in ["enterprise-portal", "enterprise-admin"] %}
 CORS_ORIGIN_WHITELIST.append("http://{{ MFE_HOST }}:{{ app['port'] }}")
 CSRF_TRUSTED_ORIGINS.append("http://{{ MFE_HOST }}:{{ app['port'] }}")
 {% endif %}

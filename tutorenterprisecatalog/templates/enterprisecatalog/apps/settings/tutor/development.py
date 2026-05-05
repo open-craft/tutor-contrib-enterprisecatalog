@@ -16,11 +16,11 @@ SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL = SOCIAL_AUTH_EDX_OAUTH2_ISSUER + "/logout"
 LMS_BASE_URL = "http://{{ LMS_HOST }}:8000"
 DISCOVERY_SERVICE_API_URL = "http://{{ DISCOVERY_HOST }}:8381/api/v1/"
 ECOMMERCE_BASE_URL = "http://{{ ECOMMERCE_HOST }}:8130"
-ENTERPRISE_LEARNER_PORTAL_BASE_URL = "http://{{ MFE_HOST }}:8734/learner-portal-enterprise"
+ENTERPRISE_LEARNER_PORTAL_BASE_URL = "http://{{ MFE_HOST }}:8734/enterprise-portal"
 LICENSE_MANAGER_BASE_URL = "http://{{ LICENSE_MANAGER_HOST }}:{{ LICENSE_MANAGER_PORT }}"
 
 {% for app_name, app in iter_mfes() %}
-{% if app_name in ["enterprise", "admin-enterprise"] %}
+{% if app_name in ["enterprise-portal", "enterprise-admin"] %}
 CORS_ORIGIN_WHITELIST.append("http://{{ MFE_HOST }}:{{ app['port'] }}")
 CSRF_TRUSTED_ORIGINS.append("http://{{ MFE_HOST }}:{{ app['port'] }}")
 {% endif %}

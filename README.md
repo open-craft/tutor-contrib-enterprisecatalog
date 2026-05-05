@@ -51,12 +51,12 @@ from tutormfe.hooks import MFE_APPS
 
 @MFE_APPS.add()
 def _replace_mfes(mfes):
-    mfes["enterprise"] = {
+    mfes["enterprise-portal"] = {
         "repository": "https://github.com/openedx/frontend-app-learner-portal-enterprise.git",
         "port": 8734,
         "version": "main"
     }
-    mfes["admin-enterprise"] = {
+    mfes["enterprise-admin"] = {
         "repository": "https://github.com/openedx/frontend-app-admin-portal.git",
         "port": 1991,
         "version": "main"
@@ -76,7 +76,7 @@ To compensate for these differences the plugin exposes the following values that
 * `ENTERPRISE_LEARNER_PORTAL_BUILD_ENV`, `ENTERPRISE_ADMIN_PORTAL_BUILD_ENV` - these can be set to `dev` or `prod` and default to `prod`. So, if you are running the services locally using `tutor dev`, make sure to set these in your `config.yml` file to `dev`.
 * `ENTERPRISE_LEARNER_PORTAL_BUILD_ENV_EXTRAS`, `ENTERPRISE_ADMIN_PORTAL_BUILD_ENV_EXTRAS` - these take a dict of values that are typically found in the `.env` files of these MFEs. These must be used to set things like `FEATURE_*` flags.
 
-Set these values in your `config.yml` file, run `tutor config save` and then rebuild mfe tutor image using `tutor images build mfe` for changes to be included in the MFE build. 
+Set these values in your `config.yml` file, run `tutor config save` and then rebuild mfe tutor image using `tutor images build mfe` for changes to be included in the MFE build.
 
 #### Example
 
@@ -90,7 +90,7 @@ ENTERPRISE_LEARNER_PORTAL_BUILD_ENV_EXTRAS:
 
 > [!NOTE]
 > There are 2 MFEs added by this plugin - frontend-app-learner-portal-enterprise, frontend-app-admin-portal.
-> They are mapped to the app names `enterprise` and `admin-enterprise` respectively. Replace `<mfe-app>` with
+> They are mapped to the app names `enterprise-portal` and `enterprise-admin` respectively. Replace `<mfe-app>` with
 > either of those 2 values in the instructions below.
 
 1. Clone the MFE repo, checkout to your branch and run `npm ci` to have dependencies installed.
@@ -131,8 +131,8 @@ While developing locally the services can be accessed from the following URLs
 * http://enterprise-access.local.openedx.io:8270/login/
 * http://enterprise-subsidy.local.openedx.io:8280/login/
 * http://license-manager.local.openedx.io:8170/login/
-* http://apps.local.openedx.io:8734/enterprise/
-* http://apps.local.openedx.io:1991/admin-enterprise/
+* http://apps.local.openedx.io:8734/enterprise-portal/
+* http://apps.local.openedx.io:1991/enterprise-admin/
 
 
 ## License
