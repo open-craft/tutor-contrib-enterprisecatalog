@@ -26,4 +26,7 @@ CORS_ORIGIN_WHITELIST = list(CORS_ORIGIN_WHITELIST) + [
 ]
 CSRF_TRUSTED_ORIGINS.append("{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ MFE_HOST }}")
 
+CORS_ORIGIN_WHITELIST.append("{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}")
+CSRF_TRUSTED_ORIGINS.append("{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}")
+
 {{ patch("enterprise-catalog-production-settings") }}
