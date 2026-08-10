@@ -10,4 +10,3 @@ ENV LMS_BASE_URL={% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HO
 {%- for key, value in ENTERPRISE_LEARNER_PORTAL_BUILD_ENV_EXTRAS.items() %}
 ENV {{ key }}={{ value }}
 {%- endfor %}
-RUN rm /openedx/app/env.config.jsx
