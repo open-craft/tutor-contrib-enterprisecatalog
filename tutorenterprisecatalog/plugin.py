@@ -414,7 +414,7 @@ MFES = {
     "enterprise-portal": {
         "repository": "https://github.com/open-craft/frontend-app-learner-portal-enterprise.git",
         "port": 8734,
-        "version": "agrendalath/course-finder-only",
+        "version": "agrendalath/header-and-footer",
     },
     "enterprise-admin": {
         "repository": "https://github.com/open-craft/frontend-app-admin-portal.git",
