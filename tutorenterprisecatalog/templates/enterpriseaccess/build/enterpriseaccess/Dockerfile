@@ -48,7 +48,7 @@ RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install -r 
 # Install base requirements
 RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install -r requirements/production.txt
 # Install django-redis explicitly. Upstream uses memcached for caching, using redis to avoid another dep.
-RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install django-redis
+RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install "django-redis<7"
 {% for extra_requirement in ENTERPRISE_ACCESS_EXTRA_PIP_REQUIREMENTS %}RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install '{{ extra_requirement }}'
 {% endfor %}
 
