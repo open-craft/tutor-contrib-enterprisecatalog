@@ -40,7 +40,9 @@ setup(
     include_package_data=True,
     install_requires=[
         "tutor>=21.0.0,<22.0.0",
-        "tutor-mfe>=21.0.0,<22.0.0"
+        "tutor-mfe>=21.0.0,<22.0.0",
+        "tutor-discovery @ git+https://github.com/open-craft/tutor-discovery.git@agrendalath/bb-10290-fix-logger#egg=tutor-discovery",
+        "tutor-ecommerce @ git+https://github.com/open-craft/tutor-ecommerce.git@tecoholic/ulmo#egg=tutor-ecommerce",
     ],
     extras_require={"dev": "tutor[dev]>=20.0.0,<22.0.0"},
     python_requires=">=3.11",

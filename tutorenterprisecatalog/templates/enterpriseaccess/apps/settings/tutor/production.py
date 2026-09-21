@@ -5,6 +5,7 @@ from ..production import *
 BACKEND_SERVICE_EDX_OAUTH2_KEY = "{{ ENTERPRISE_ACCESS_OAUTH2_KEY }}"
 BACKEND_SERVICE_EDX_OAUTH2_SECRET = "{{ ENTERPRISE_ACCESS_OAUTH2_SECRET }}"
 BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = "http://lms:8000/oauth2"
+OAUTH2_PROVIDER_URL = BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL
 
 SOCIAL_AUTH_EDX_OAUTH2_KEY = "{{ ENTERPRISE_ACCESS_OAUTH2_KEY_SSO }}"
 SOCIAL_AUTH_EDX_OAUTH2_SECRET = "{{ ENTERPRISE_ACCESS_OAUTH2_SECRET_SSO }}"
@@ -29,5 +30,8 @@ CORS_ORIGIN_WHITELIST = list(CORS_ORIGIN_WHITELIST) + [
     "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ MFE_HOST }}",
 ]
 CSRF_TRUSTED_ORIGINS.append("{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ MFE_HOST }}")
+
+CORS_ORIGIN_WHITELIST.append("{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}")
+CSRF_TRUSTED_ORIGINS.append("{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}")
 
 {{ patch("enterprise-access-production-settings") }}

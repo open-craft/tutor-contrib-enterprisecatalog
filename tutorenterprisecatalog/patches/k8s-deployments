@@ -1,0 +1,256 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-catalog
+  labels:
+    app.kubernetes.io/name: enterprise-catalog
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: enterprise-catalog
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: enterprise-catalog
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      containers:
+        - name: enterprise-catalog
+          image: {{ ENTERPRISE_CATALOG_DOCKER_IMAGE }}
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - mountPath: /openedx/enterprise-catalog/enterprise_catalog/settings/tutor/
+              name: settings
+          securityContext:
+            allowPrivilegeEscalation: false
+      volumes:
+        - name: settings
+          configMap:
+            name: enterprise-catalog-settings
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-catalog-worker
+  labels:
+    app.kubernetes.io/name: enterprise-catalog-worker
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: enterprise-catalog-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: enterprise-catalog-worker
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      containers:
+        - name: enterprise-catalog-worker
+          image: {{ ENTERPRISE_CATALOG_WORKER_DOCKER_IMAGE }}
+          volumeMounts:
+            - mountPath: /openedx/enterprise-catalog/enterprise_catalog/settings/tutor/
+              name: settings
+          securityContext:
+            allowPrivilegeEscalation: false
+      volumes:
+        - name: settings
+          configMap:
+            name: enterprise-catalog-settings
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: license-manager
+  labels:
+    app.kubernetes.io/name: license-manager
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: license-manager
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: license-manager
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      containers:
+        - name: license-manager
+          image: {{ LICENSE_MANAGER_DOCKER_IMAGE }}
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - mountPath: /openedx/license-manager/license_manager/settings/tutor/
+              name: settings
+          securityContext:
+            allowPrivilegeEscalation: false
+      volumes:
+        - name: settings
+          configMap:
+            name: license-manager-settings
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: license-manager-worker
+  labels:
+    app.kubernetes.io/name: license-manager-worker
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: license-manager-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: license-manager-worker
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      containers:
+        - name: license-manager-worker
+          image: {{ LICENSE_MANAGER_WORKER_DOCKER_IMAGE }}
+          volumeMounts:
+            - mountPath: /openedx/license-manager/license_manager/settings/tutor/
+              name: settings
+          securityContext:
+            allowPrivilegeEscalation: false
+      volumes:
+        - name: settings
+          configMap:
+            name: license-manager-settings
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: license-manager-bulk-enrollment-worker
+  labels:
+    app.kubernetes.io/name: license-manager-bulk-enrollment-worker
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: license-manager-bulk-enrollment-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: license-manager-bulk-enrollment-worker
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      containers:
+        - name: license-manager-bulk-enrollment-worker
+          image: {{ LICENSE_MANAGER_BULK_ENROLLMENT_WORKER_DOCKER_IMAGE }}
+          volumeMounts:
+            - mountPath: /openedx/license-manager/license_manager/settings/tutor/
+              name: settings
+          securityContext:
+            allowPrivilegeEscalation: false
+      volumes:
+        - name: settings
+          configMap:
+            name: license-manager-settings
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-access
+  labels:
+    app.kubernetes.io/name: enterprise-access
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: enterprise-access
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: enterprise-access
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      containers:
+        - name: enterprise-access
+          image: {{ ENTERPRISE_ACCESS_DOCKER_IMAGE }}
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - mountPath: /openedx/enterprise-access/enterprise_access/settings/tutor/
+              name: settings
+          securityContext:
+            allowPrivilegeEscalation: false
+      volumes:
+        - name: settings
+          configMap:
+            name: enterprise-access-settings
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-access-worker
+  labels:
+    app.kubernetes.io/name: enterprise-access-worker
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: enterprise-access-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: enterprise-access-worker
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      containers:
+        - name: enterprise-access-worker
+          image: {{ ENTERPRISE_ACCESS_WORKER_DOCKER_IMAGE }}
+          volumeMounts:
+            - mountPath: /openedx/enterprise-access/enterprise_access/settings/tutor/
+              name: settings
+          securityContext:
+            allowPrivilegeEscalation: false
+      volumes:
+        - name: settings
+          configMap:
+            name: enterprise-access-settings
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-subsidy
+  labels:
+    app.kubernetes.io/name: enterprise-subsidy
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: enterprise-subsidy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: enterprise-subsidy
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      containers:
+        - name: enterprise-subsidy
+          image: {{ ENTERPRISE_SUBSIDY_DOCKER_IMAGE }}
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - mountPath: /openedx/enterprise-subsidy/enterprise_subsidy/settings/tutor/
+              name: settings
+          securityContext:
+            allowPrivilegeEscalation: false
+      volumes:
+        - name: settings
+          configMap:
+            name: enterprise-subsidy-settings

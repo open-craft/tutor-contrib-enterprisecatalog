@@ -1,0 +1,12 @@
+- name: enterprise-catalog-settings
+  files:{% for file in "enterprisecatalog/apps/settings/tutor"|walk_templates %}
+  - plugins/{{ file }}{% endfor %}
+- name: license-manager-settings
+  files:{% for file in "licensemanager/apps/settings/tutor"|walk_templates %}
+  - plugins/{{ file }}{% endfor %}
+- name: enterprise-access-settings
+  files:{% for file in "enterpriseaccess/apps/settings/tutor"|walk_templates %}
+  - plugins/{{ file }}{% endfor %}
+- name: enterprise-subsidy-settings
+  files:{% for file in "enterprisesubsidy/apps/settings/tutor"|walk_templates %}
+  - plugins/{{ file }}{% endfor %}

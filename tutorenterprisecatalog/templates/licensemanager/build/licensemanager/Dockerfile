@@ -46,9 +46,8 @@ RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install -r 
 # This is identical to "make production-requirements" but it was split in multiple
 # instructions to benefit from docker image caching
 # Install base requirements
-RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install -r requirements/production.txt
 # Install django-redis explicitly. Upstream uses memcached for caching, using redis to avoid another dep.
-RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install django-redis
+RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install -r requirements/production.txt django-redis
 {% for extra_requirement in LICENSE_MANAGER_EXTRA_PIP_REQUIREMENTS %}RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install '{{ extra_requirement }}'
 {% endfor %}
 
@@ -70,18 +69,21 @@ FROM minimal AS license-manager
 
 {{ patch("license-manager-dockerfile-post-python-requirements") }}
 
+RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared pip install uwsgi==2.0.30
+
 # Collect static assets
 COPY --chown=app:app assets.py ./license_manager/settings/assets.py
 RUN DJANGO_SETTINGS_MODULE=license_manager.settings.assets make static
 
 # Run production server
 ENV DJANGO_SETTINGS_MODULE license_manager.settings.tutor.production
-EXPOSE {{ LICENSE_MANAGER_PORT }}
-CMD gunicorn \
-    --reload \
-    --workers=2 \
-    --name license_manager \
-    -c /openedx/license-manager/license_manager/docker_gunicorn_configuration.py \
-    --log-file - \
-    --max-requests=1000 \
-    license_manager.wsgi:application
+EXPOSE 8000
+CMD uwsgi \
+    --static-map /static=/openedx/license-manager/license_manager/assets \
+    --http 0.0.0.0:8000 \
+    --thunder-lock \
+    --single-interpreter \
+    --enable-threads \
+    --processes=2 \
+    --buffer-size=8192 \
+    --wsgi-file license_manager/wsgi.py
