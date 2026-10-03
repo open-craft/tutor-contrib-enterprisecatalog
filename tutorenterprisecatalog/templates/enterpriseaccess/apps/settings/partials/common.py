@@ -74,7 +74,13 @@ JWT_AUTH["JWT_ISSUERS"] = [
 ]
 
 EDX_DRF_EXTENSIONS = {
-    'OAUTH2_USER_INFO_URL': '{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}/oauth2/user_info',
+    "OAUTH2_USER_INFO_URL": "{% if ENABLE_HTTPS %}https{% else %}http{% endif %}://{{ LMS_HOST }}/oauth2/user_info",
+    "JWT_PAYLOAD_USER_ATTRIBUTE_MAPPING": {
+        "administrator": "is_staff",
+        "email": "email",
+        "full_name": "full_name",
+        "user_id": "lms_user_id",
+    },
 }
 
 CELERY_BROKER_TRANSPORT = "redis"
